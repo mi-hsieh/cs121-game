@@ -9,56 +9,44 @@ import android.graphics.Rect;
  * Created by Michael on 4/24/2018.
  */
 
-public class Player {
+public class Tile {
 
-    //Bitmap to get character from image
+    //Bitmap to get tile (platform) from image
     private Bitmap bitmap;
 
     //desired width and height of Bitmap
     private int width;
     private int height;
 
-    //Rectangle hit box for the character
+    //Rectangle hit box for the tile
     private Rect rect;
 
     //coordinates
     private int x;
     private int y;
 
-    //motion speed of the character
-    private int speed = 0;
-
     //constructor
-    public Player(Context context) {
-
-
+    public Tile(Context context) {
 
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pikachu);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
             e.printStackTrace();
         }
 
-        width = 300;
-        height = 300;
-
-        //System.out.println("Bitmap width and height: " + width + " " + height);
+        width = 200;
+        height = 200;
 
         // initial coordinates
-        x = 1200  + width;   //75
-        y = GameView.getScreenHeight()/2 - height;     //50
-        speed = 1;
-
-        /*
-        Bitmap createScaledBitmap (Bitmap src,
-        int dstWidth,
-        int dstHeight,
-        boolean filter)
-        */
+        // x + player width
+        x = 1500  + (300);
+        // we want the middle tile centered with the player
+        // so the top tile is 2*height above the player
+        y = (GameView.getScreenHeight()/2) - (3*height);    // 75;
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {
@@ -75,10 +63,10 @@ public class Player {
 
     }
 
-    // method to update coordinate of character
+    // platforms don't move
+
+    // method to update coordinate of tile
     public void update(){
-        //updating x coordinate
-        //x+=10;
 
         //adding top, left, bottom and right to the rect object
         rect.left = x;
@@ -101,12 +89,12 @@ public class Player {
         return y;
     }
 
-    public int getSpeed() {
-        return speed;
-    }
-
-    public Rect getCollisionRect() {
-        return rect;
+    // move tiles to initial positions (down y axis)
+    // when first made
+    // spacing is the space between tiles
+    public void shiftDown(int shift)
+    {
+        y += shift;
     }
 
     public int getWidth()
@@ -119,4 +107,9 @@ public class Player {
         return height;
     }
 
+    public Rect getCollisionRect() {
+        return rect;
+    }
+
 }
+

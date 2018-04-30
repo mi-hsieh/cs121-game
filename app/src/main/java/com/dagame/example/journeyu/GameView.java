@@ -1,14 +1,18 @@
 package com.dagame.example.journeyu;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -25,6 +29,29 @@ public class GameView extends SurfaceView implements Runnable{
 
     // adding player to this class
     private Player player;
+
+    // array list of platforms
+    private ArrayList<Tile> tiles = new ArrayList<Tile>();
+
+    // amount to shift tiles by so they line up vertically
+    int shiftY;
+
+    // number of tiles
+    int numTiles;
+
+    /*
+         public Rect (int left, int top, int right, int bottom)
+         Create a new rectangle with the specified coordinates. Note: no range
+         checking is performed, so the caller must ensure that left <= right and
+         top <= bottom.
+
+         Parameters
+         left : The X coordinate of the left side of the rectangle
+         top : The Y coordinate of the top of the rectangle
+         right : The X coordinate of the right side of the rectangle
+         bottom : The Y coordinate of the bottom of the rectangle
+
+     */
 
     //private static final String TAG = "Rectangle";
     private Rect rect2 = new Rect(1000, 50, 1300, 350);
@@ -51,11 +78,24 @@ public class GameView extends SurfaceView implements Runnable{
         super(context);
 
         // initialize player object
-        player = new Player(context);
+               player = new Player(context);
 
         // initialize drawing objects
         surfaceHolder = getHolder();
         paint = new Paint();
+
+        numTiles = 5;
+
+        shiftY = 0;
+        for (int i = 0; i < numTiles; i++)
+        {
+            Tile t = new Tile(context);
+            tiles.add(t);
+            t.shiftDown(shiftY);
+            shiftY += t.getWidth();
+            //spacing between tiles
+            shiftY += 10;
+        }
 
     }
 
@@ -81,9 +121,9 @@ public class GameView extends SurfaceView implements Runnable{
         // DETECT COLLISIONS HERE
         if (Rect.intersects(player.getCollisionRect(), rect2)) {
 
+            // Intersects player bounding rectangle
             isHit = true;
 
-            // Intersects player bounding rectangle
             /*Log.d(TAG, "Intersection successful.");
             System.out.println("Player rect x and y: " + player.getCollisionRect().left
                     + " " + player.getCollisionRect().top);
@@ -104,7 +144,7 @@ public class GameView extends SurfaceView implements Runnable{
             // lock the canvas ready to draw
             canvas = surfaceHolder.lockCanvas();
             // draw a background color for canvas
-            // right now using transparent, a solid color example is Color.argb(255, 26, 128, 182)
+            // right now using transparent
             // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
@@ -126,6 +166,17 @@ public class GameView extends SurfaceView implements Runnable{
             // restore paint to default settings for bitmap
             paint.reset();
 
+            // draw the tiles
+            for (Tile t : tiles)
+            {
+                canvas.drawBitmap(
+                        t.getBitmap(),
+                        t.getX(),
+                        t.getY(),
+                        paint
+                );
+            }
+
             // draw the player
             canvas.drawBitmap(
                     player.getBitmap(),
@@ -134,9 +185,7 @@ public class GameView extends SurfaceView implements Runnable{
                     paint
             );
 
-
             paint.setStyle(Paint.Style.STROKE);
-            // previously Color.CYAN
             paint.setColor(Color.argb(255, 26, 128, 182));
             // draw the corresponding player rectangle
             canvas.drawRect(player.getCollisionRect(), paint);
@@ -171,10 +220,11 @@ public class GameView extends SurfaceView implements Runnable{
            set the variable to false */
         playing = false;
         try {
+            // Parent thread must wait until the end of gameThread
             // stopping the thread
             gameThread.join();
         } catch (InterruptedException e) {
-            // nothing here
+            e.printStackTrace();
         }
     }
 
@@ -184,5 +234,35 @@ public class GameView extends SurfaceView implements Runnable{
         playing = true;
         gameThread = new Thread(this);
         gameThread.start();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_UP:
+                //When the user presses on the screen
+                //we will do something here
+
+                break;
+            case MotionEvent.ACTION_DOWN:
+                //When the user releases the screen
+                //do something here
+                break;
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                // when the screen is pressed
+                // do something here
+                break;
+        }
+        return true;
+    }
+
+    // public methods to get phone screen's width and height
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 }

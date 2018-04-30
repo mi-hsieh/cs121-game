@@ -44,46 +44,6 @@ public class MainActivity extends AppCompatActivity {
         // add the view to our content view
         setContentView(gameView);
 
-
-        /*
-         public Rect (int left, int top, int right, int bottom)
-         Create a new rectangle with the specified coordinates. Note: no range
-         checking is performed, so the caller must ensure that left <= right and
-         top <= bottom.
-
-         Parameters
-         left : The X coordinate of the left side of the rectangle
-         top : The Y coordinate of the top of the rectangle
-         right : The X coordinate of the right side of the rectangle
-         bottom : The Y coordinate of the bottom of the rectangle
-
-                */
-
-        /*ImageView iv = findViewById(R.id.imageViewPika);
-        ImageView iv2 = findViewById(R.id.imageViewSaur);
-
-        System.out.println("Running.");
-
-        Rect myViewRect = new Rect();
-        myViewRect.set((int) iv.getX(), (int) iv.getY(),
-                (int) (iv.getX() + iv.getWidth()), (int) (iv.getY() - iv.getHeight()));
-        System.out.println((int) iv.getX() + " " +  (int) iv.getY() + " " +
-                (int) (iv.getX() + iv.getWidth()) + " " +  (int) (iv.getY() - iv.getHeight()));
-        iv.getDrawingRect(myViewRect);
-        Log.d(TAG, "iv height: " + myViewRect.height());
-        Log.d(TAG, "iv width: " + myViewRect.width());
-
-        Rect otherViewRect1 = new Rect();
-        iv2.getDrawingRect(otherViewRect1);
-
-        Log.d(TAG, "iv2 height: " + otherViewRect1.height());
-        Log.d(TAG, "iv2 width: " + otherViewRect1.width());
-
-       if (Rect.intersects(myViewRect, otherViewRect1)) {
-            // Intersects otherView1
-            Log.d(TAG, "Intersection successful.");
-        }*/
-
     }
 
     // pause the game when activity is paused
