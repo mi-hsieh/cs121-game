@@ -30,6 +30,9 @@ public class GameView extends SurfaceView implements Runnable{
     // adding player to this class
     private Player player;
 
+    // upButton
+    private UpButton upButton;
+
     // array list of platforms
     private ArrayList<Tile> tiles = new ArrayList<Tile>();
 
@@ -80,6 +83,7 @@ public class GameView extends SurfaceView implements Runnable{
         // initialize player object
                player = new Player(context);
 
+               upButton = new UpButton(context);
         // initialize drawing objects
         surfaceHolder = getHolder();
         paint = new Paint();
@@ -185,6 +189,14 @@ public class GameView extends SurfaceView implements Runnable{
                     paint
             );
 
+            //draw upButton
+            canvas.drawBitmap(
+                    upButton.getBitmap(),
+                    upButton.getX(),
+                    upButton.getY(),
+                    paint
+            );
+
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.argb(255, 26, 128, 182));
             // draw the corresponding player rectangle
@@ -240,9 +252,9 @@ public class GameView extends SurfaceView implements Runnable{
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
-                //When the user presses on the screen
-                //we will do something here
-
+                if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 1200) {
+                    player.setX(1300);
+                }
                 break;
             case MotionEvent.ACTION_DOWN:
                 //When the user releases the screen

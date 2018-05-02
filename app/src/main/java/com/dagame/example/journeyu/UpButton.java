@@ -43,7 +43,7 @@ public class UpButton {
 
         // initial coordinates
         x = 1800  + width;   //75
-        y = GameView.getScreenHeight() - height;     //50
+        y = GameView.getScreenHeight() - 1200;     //50
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {

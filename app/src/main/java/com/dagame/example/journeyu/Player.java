@@ -101,6 +101,10 @@ public class Player {
         return y;
     }
 
+    public void setX(int a) { x = a; }
+
+    public void setY(int b) { y = b; }
+
     public int getSpeed() {
         return speed;
     }
