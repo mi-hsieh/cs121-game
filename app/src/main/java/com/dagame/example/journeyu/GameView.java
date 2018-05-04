@@ -13,6 +13,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -21,7 +22,8 @@ import java.util.ArrayList;
 public class GameView extends SurfaceView implements Runnable{
 
     // boolean variable to track if the game is playing or not
-    // volatile = a field might be modified by multiple threads that are executing at the same time
+    // volatile = a field might be modified by multiple threads that are executing at the same time, for scope
+    // in case we're using multiple threads, the variable is visible and able to be updated by other threads
     volatile boolean playing;
 
     // the game thread
@@ -33,7 +35,10 @@ public class GameView extends SurfaceView implements Runnable{
     // upButton
     private UpButton upButton;
 
-    // array list of platforms
+    // downButton
+    private DownButton downButton;
+
+    // array list of platforms, platforms = tiles
     private ArrayList<Tile> tiles = new ArrayList<Tile>();
 
     // amount to shift tiles by so they line up vertically
@@ -41,6 +46,11 @@ public class GameView extends SurfaceView implements Runnable{
 
     // number of tiles
     int numTiles;
+
+    // adding Obstacle
+    private ArrayList<Obstacle1> obstacles = new ArrayList<Obstacle1>();
+
+    int numObstacles;
 
     /*
          public Rect (int left, int top, int right, int bottom)
@@ -57,6 +67,7 @@ public class GameView extends SurfaceView implements Runnable{
      */
 
     //private static final String TAG = "Rectangle";
+    // a test rectangle
     private Rect rect2 = new Rect(1000, 50, 1300, 350);
     private boolean isHit = false;
 
@@ -81,9 +92,12 @@ public class GameView extends SurfaceView implements Runnable{
         super(context);
 
         // initialize player object
-               player = new Player(context);
+        player = new Player(context);
 
-               upButton = new UpButton(context);
+        upButton = new UpButton(context);
+
+        downButton = new DownButton(context);
+
         // initialize drawing objects
         surfaceHolder = getHolder();
         paint = new Paint();
@@ -98,12 +112,53 @@ public class GameView extends SurfaceView implements Runnable{
             t.shiftDown(shiftY);
             shiftY += t.getWidth();
             //spacing between tiles
-            shiftY += 10;
+            //shiftY += 10;
+        }
+
+        Random r = new Random();
+        int randInt = 0;
+
+        numObstacles = 5;
+        for (int i = 0; i < numObstacles; i++)
+        {
+            Obstacle1 ob = new Obstacle1(context);
+
+            // option 1
+            // random obstacle y positions
+            /* gives a random integer between min (inclusive) and max (exclusive)
+            // int i1 = r.nextInt(max - min + 1) + min; */
+            // ex. randInt = r.nextInt(80 - 65) + 65;
+            // randInt = r.nextInt((GameView.getScreenHeight()-ob.getHeight()) - 0 + 1) + 0;
+
+            // option 2
+            // the obstacles are aligned with the tiles (tile 0 is the top tile)
+            randInt = tiles.get(i).getY();
+            ob.setY(randInt);
+            obstacles.add(ob);
         }
 
     }
 
+    /* A class that implements Runnable can run without subclassing Thread by
+    instantiating a Thread instance and passing itself in as the target. In most cases, the
+    Runnable interface should be used if you are only planning to
+    override the run() method and no other Thread methods.
+     */
+
+    /* When an object implementing interface Runnable is used to create a thread,
+    starting the thread causes the object's run method to be called
+    in that separately executing thread.
+     */
+
+    /* run()
+    If this thread was constructed using a separate Runnable run object, then
+    that Runnable object's run method is called; otherwise, this method does
+    nothing and returns.
+     */
+
     // Using Runnable, so need to implement run()
+    // From documentation: The class must define a method of no arguments called run.
+    // calls three methods also defined in this class
     @Override
     public void run() {
         while (playing) {
@@ -113,7 +168,7 @@ public class GameView extends SurfaceView implements Runnable{
             // draw the frame
             draw();
 
-            // control
+            // control the frame rate
             control();
         }
     }
@@ -121,6 +176,13 @@ public class GameView extends SurfaceView implements Runnable{
     private void update() {
         // update the player position
         player.update();
+
+        // update obstacle position
+        for (Obstacle1 ob : obstacles) {
+            if (ob.isVisible()) {
+                ob.update();
+            }
+        }
 
         // DETECT COLLISIONS HERE
         if (Rect.intersects(player.getCollisionRect(), rect2)) {
@@ -137,6 +199,25 @@ public class GameView extends SurfaceView implements Runnable{
         else
         {
             isHit = false;
+        }
+
+        for (Obstacle1 ob : obstacles)
+        {
+            if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) && ob.isVisible())
+            {
+                isHit = true;
+            }
+        }
+
+        // when obstacles reach the end of the screen, they are destroyed
+        // looping backwards because remove() removes object at end of array list
+        for (int i=obstacles.size()-1; i>=0; i--)
+        {
+            if (obstacles.get(i).getX() >= GameView.getScreenWidth())
+            {
+                obstacles.get(i).setVisible(false);
+                obstacles.remove(i);
+            }
         }
     }
 
@@ -197,10 +278,38 @@ public class GameView extends SurfaceView implements Runnable{
                     paint
             );
 
+            //draw downButton
+            canvas.drawBitmap(
+                    downButton.getBitmap(),
+                    downButton.getX(),
+                    downButton.getY(),
+                    paint
+            );
+
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.argb(255, 26, 128, 182));
             // draw the corresponding player rectangle
             canvas.drawRect(player.getCollisionRect(), paint);
+
+            for (Obstacle1 ob : obstacles) {
+                if (ob.isVisible()) {
+                    canvas.drawBitmap(
+                            ob.getBitmap(),
+                            ob.getX(),
+                            ob.getY(),
+                            paint
+                    );
+                }
+            }
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.MAGENTA);
+            for (Obstacle1 ob : obstacles) {
+                // draw the corresponding obstacle rectangle
+                if (ob.isVisible()) {
+                    canvas.drawRect(ob.getCollisionRect(), paint);
+                }
+            }
 
             // restore paint to default settings for next frame
             // paint.reset();
@@ -252,8 +361,11 @@ public class GameView extends SurfaceView implements Runnable{
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
-                if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 1200) {
-                    player.setX(1300);
+                if(motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
+                    player.setY(player.getY() - 200);
+                }
+                if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
+                    player.setY(player.getY() + 200);
                 }
                 break;
             case MotionEvent.ACTION_DOWN:

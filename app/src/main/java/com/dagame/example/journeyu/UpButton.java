@@ -42,8 +42,8 @@ public class UpButton {
         height = 300;
 
         // initial coordinates
-        x = 1800  + width;   //75
-        y = GameView.getScreenHeight() - 1200;     //50
+        x = 1800  + width;
+        y = GameView.getScreenHeight() - 1400;
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {
@@ -72,6 +72,14 @@ public class UpButton {
 
     public int getY() {
         return y;
+    }
+
+    public void setX(int a) {
+        x=a;
+    }
+
+    public void setY(int b) {
+        y=b;
     }
 
     public Rect getCollisionRect() {

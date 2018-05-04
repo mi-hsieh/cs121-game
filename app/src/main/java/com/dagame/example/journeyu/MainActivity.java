@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // run the game when the activity is resumed
+    // is also called when the activity is first started
     @Override
     protected void onResume()
     {

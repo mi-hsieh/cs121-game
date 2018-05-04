@@ -31,8 +31,6 @@ public class Player {
     //constructor
     public Player(Context context) {
 
-
-
         // Getting bitmap from drawable resource
         // currently using default png
         try {
@@ -43,14 +41,14 @@ public class Player {
             e.printStackTrace();
         }
 
-        width = 300;
-        height = 300;
+        width = 200;
+        height = 200;
 
         //System.out.println("Bitmap width and height: " + width + " " + height);
 
         // initial coordinates
-        x = 1200  + width;   //75
-        y = GameView.getScreenHeight()/2 - height;     //50
+        x = 1600;   //orig 75
+        y = GameView.getScreenHeight()/2 - height;     //orig 50
         speed = 1;
 
         /*

@@ -5,33 +5,35 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
-/**
- * Created by Michael on 4/24/2018.
- */
 
-public class Tile {
-
-    //Bitmap to get tile (platform) from image
+public class Obstacle1 {
+    //Bitmap to get character from image
     private Bitmap bitmap;
 
     //desired width and height of Bitmap
     private int width;
     private int height;
 
-    //Rectangle hit box for the tile
+    //Rectangle hit box for the character
     private Rect rect;
 
     //coordinates
     private int x;
     private int y;
 
+    // whether the obstacle is drawable or not, default false
+    private boolean visible;
+
+    //motion speed of the character
+    private int speed = 0;
+
     //constructor
-    public Tile(Context context) {
+    public Obstacle1(Context context) {
 
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.smileface);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
@@ -41,12 +43,22 @@ public class Tile {
         width = 200;
         height = 200;
 
+        //System.out.println("Bitmap width and height: " + width + " " + height);
+
         // initial coordinates
-        // x + player width
-        x = 1500  + (300);
-        // we want the middle tile centered with the player
-        // so the top tile is 2*height above the player
-        y = (GameView.getScreenHeight()/2) - (3*height);    // 75;
+        x = 0;  //1200  + width;
+        y = 0;  //GameView.getScreenHeight()/2 - height;
+        speed = 5;
+
+        // set visibility to true
+        visible = true;
+
+        /*
+        Bitmap createScaledBitmap (Bitmap src,
+        int dstWidth,
+        int dstHeight,
+        boolean filter)
+        */
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {
@@ -63,10 +75,10 @@ public class Tile {
 
     }
 
-    // platforms don't move
-
-    // method to update coordinate of tile
+    // method to update coordinate of character
     public void update(){
+        //updating x coordinate
+        x+=speed;
 
         //adding top, left, bottom and right to the rect object
         rect.left = x;
@@ -75,7 +87,7 @@ public class Tile {
         rect.bottom = y + height; //bitmap.getHeight();
     }
 
-    // access methods
+    // access and getter methods
 
     public Bitmap getBitmap() {
         return bitmap;
@@ -89,12 +101,26 @@ public class Tile {
         return y;
     }
 
-    // move tiles to initial positions (down y axis)
-    // when first made
-    // spacing is the space between tiles
-    public void shiftDown(int shift)
+    public void setX(int a) { x = a; }
+
+    public void setY(int a) { y = a; }
+
+    public boolean isVisible()
     {
-        y += shift;
+        return visible;
+    }
+
+    public void setVisible(boolean v)
+    {
+        visible = v;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public Rect getCollisionRect() {
+        return rect;
     }
 
     public int getWidth()
@@ -107,9 +133,10 @@ public class Tile {
         return height;
     }
 
-    public Rect getCollisionRect() {
-        return rect;
-    }
-
 }
+
+
+
+
+
 
