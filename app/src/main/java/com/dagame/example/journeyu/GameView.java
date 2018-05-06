@@ -29,6 +29,8 @@ public class GameView extends SurfaceView implements Runnable{
     // the game thread
     private Thread gameThread = null;
 
+    int time = 17;  // milliseconds
+
     // adding player to this class
     private Player player;
 
@@ -70,8 +72,6 @@ public class GameView extends SurfaceView implements Runnable{
     // a test rectangle
     private Rect rect2 = new Rect(1000, 50, 1300, 350);
     private boolean isHit = false;
-
-    int time = 17;  // milliseconds
 
     /* The Canvas class holds the "draw" calls.
     To draw something, you need 4 basic components: A Bitmap to hold the pixels,
@@ -249,7 +249,7 @@ public class GameView extends SurfaceView implements Runnable{
             }
             canvas.drawRect(rect2, paint);
             // restore paint to default settings for bitmap
-            paint.reset();
+            // paint.reset();
 
             // draw the tiles
             for (Tile t : tiles)
