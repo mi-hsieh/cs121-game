@@ -43,8 +43,12 @@ public class GameView extends SurfaceView implements Runnable{
     // array list of platforms, platforms = tiles
     private ArrayList<Tile> tiles = new ArrayList<Tile>();
 
+    private ArrayList<Stamina> stamina = new ArrayList<Stamina>();
+
     // amount to shift tiles by so they line up vertically
     int shiftY;
+
+    int shiftX;
 
     // number of tiles
     int numTiles;
@@ -53,6 +57,9 @@ public class GameView extends SurfaceView implements Runnable{
     private ArrayList<Obstacle1> obstacles = new ArrayList<Obstacle1>();
 
     int numObstacles;
+
+    int numStamina;
+
 
     /*
          public Rect (int left, int top, int right, int bottom)
@@ -104,6 +111,19 @@ public class GameView extends SurfaceView implements Runnable{
 
         numTiles = 5;
 
+        numStamina = 10;
+
+        shiftX = 0;
+        for (int i = 0; i < numStamina; i++)
+        {
+            Stamina s = new Stamina(context);
+            stamina.add(s);
+            s.shiftRight(shiftX);
+            shiftX += s.getWidth();
+            //spacing between staminas
+            //shiftX += 10;
+        }
+
         shiftY = 0;
         for (int i = 0; i < numTiles; i++)
         {
@@ -138,6 +158,7 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
     }
+
 
     /* A class that implements Runnable can run without subclassing Thread by
     instantiating a Thread instance and passing itself in as the target. In most cases, the
@@ -285,6 +306,15 @@ public class GameView extends SurfaceView implements Runnable{
                     downButton.getY(),
                     paint
             );
+            //draw stamina
+            for (Stamina s : stamina)
+            canvas.drawBitmap(
+                    s.getBitmap(),
+                    s.getX(),
+                    s.getY(),
+                    paint
+            );
+
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.argb(255, 26, 128, 182));
