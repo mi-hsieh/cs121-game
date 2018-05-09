@@ -31,7 +31,7 @@ public class Tile {
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.cookie);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");

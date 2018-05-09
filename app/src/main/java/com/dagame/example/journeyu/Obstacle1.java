@@ -33,7 +33,7 @@ public class Obstacle1 {
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.smileface);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icream_cone_sharp);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");

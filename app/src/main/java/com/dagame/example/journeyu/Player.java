@@ -34,7 +34,7 @@ public class Player {
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pikachu);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icecream_ball_mintchoco);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
