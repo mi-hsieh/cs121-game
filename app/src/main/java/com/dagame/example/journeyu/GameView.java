@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
+import android.media.MediaPlayer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -97,6 +98,9 @@ public class GameView extends SurfaceView implements Runnable{
     // class constructor
     public GameView(Context context) {
         super(context);
+
+        MediaPlayer medPlay = MediaPlayer.create(context, R.raw.rolem_the_white_kitty);
+        medPlay.start();
 
         // initialize player object
         player = new Player(context);
