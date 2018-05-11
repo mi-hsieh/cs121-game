@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -32,8 +35,10 @@ public class Player {
     public Player(Context context) {
 
         // Getting bitmap from drawable resource
-        // currently using default png
         try {
+            //BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.icecream_ball_mintchoco, null);
+            /*BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(context, R.drawable.icecream_ball_mintchoco);
+            bitmap = drawable.getBitmap();*/
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icecream_ball_mintchoco);
         } catch (Exception e)
         {

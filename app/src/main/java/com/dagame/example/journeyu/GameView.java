@@ -410,12 +410,18 @@ public class GameView extends SurfaceView implements Runnable{
                     // don't move if player would be above top platform, also assuming platforms initialized
                     if (player.getY() > tiles.get(0).getY()) {
                         player.setY(player.getY() - 200);
+                        if (numStamina > 0) {
+                            stamina.remove(stamina.size() - 1);
+                        }
                     }
                 }
                 if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
                     // don't move if player would be below bottom platform
                     if (player.getY() < tiles.get(tiles.size()-1).getY()) {
                         player.setY(player.getY() + 200);
+                        if (numStamina > 0) {
+                            stamina.remove(stamina.size() - 1);
+                        }
                     }
                 }
                 break;
