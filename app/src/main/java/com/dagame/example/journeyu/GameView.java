@@ -81,7 +81,7 @@ public class GameView extends SurfaceView implements Runnable{
 
     private boolean isHit = false;
     // time objects are intersecting
-    private int hitTime = 0;
+    // private int hitTime = 0;
 
     /* The Canvas class holds the "draw" calls.
     To draw something, you need 4 basic components: A Bitmap to hold the pixels,
@@ -138,7 +138,7 @@ public class GameView extends SurfaceView implements Runnable{
             //shiftY += 10;
         }
 
-        Random r = new Random();
+        // Random r = new Random();
         int randInt = 0;
 
         numObstacles = 5;
@@ -227,21 +227,29 @@ public class GameView extends SurfaceView implements Runnable{
         }
         */
 
-        for (Obstacle1 ob : obstacles)
+        Obstacle1 ob;
+
+        for (int i = 0; i < obstacles.size(); i++)
         {
+            ob = obstacles.get(i);
             if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) && ob.isVisible())
             {
-                hitTime++;
-                if (hitTime == 1) {
-                    /*System.out.println("Player rect x and y: " + player.getCollisionRect().left
-                            + " " + player.getCollisionRect().top);
-                    System.out.println("Obj rect x and y: " + ob.getCollisionRect().left
-                            + " " + ob.getCollisionRect().top);*/
-                    if (stamina.size() > 0) {
+                /*if (stamina.size() > 0) {
                         stamina.remove(stamina.get(stamina.size() - 1));
                         numStamina--;
-                    }
-                }
+                }*/
+
+                //ob.setVisible(false);
+
+                // test rectangle should flash green briefly
+                System.out.println("Hit!");
+                isHit = true;
+                System.out.println("Removing obstacle at index " + i);
+                obstacles.remove(ob);
+            }
+            else
+            {
+                isHit = false;
             }
         }
 
@@ -409,8 +417,9 @@ public class GameView extends SurfaceView implements Runnable{
                 if(motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
                     // don't move if player would be above top platform, also assuming platforms initialized
                     if (player.getY() > tiles.get(0).getY()) {
-                        player.setY(player.getY() - 200);
                         if (numStamina > 0) {
+                            player.setY(player.getY() - 200);
+                            numStamina--;
                             stamina.remove(stamina.size() - 1);
                         }
                     }
@@ -418,8 +427,9 @@ public class GameView extends SurfaceView implements Runnable{
                 if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
                     // don't move if player would be below bottom platform
                     if (player.getY() < tiles.get(tiles.size()-1).getY()) {
-                        player.setY(player.getY() + 200);
                         if (numStamina > 0) {
+                            player.setY(player.getY() + 200);
+                            numStamina--;
                             stamina.remove(stamina.size() - 1);
                         }
                     }
