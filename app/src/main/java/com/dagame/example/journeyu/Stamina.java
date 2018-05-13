@@ -26,7 +26,7 @@ public class Stamina {
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.heart);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ice_cube);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
@@ -38,7 +38,7 @@ public class Stamina {
 
         // initial coordinates
         // x + player width
-        x = 1200  + (300);
+        x = GameView.getScreenWidth()/2;    //1200  + (300);
         // we want the middle tile centered with the player
         // so the top tile is 2*height above the player
         y = (GameView.getScreenWidth()/2) - (23*height);    // 75;

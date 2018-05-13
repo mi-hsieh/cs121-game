@@ -2,15 +2,19 @@ package com.dagame.example.journeyu;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -25,6 +29,13 @@ public class GameView extends SurfaceView implements Runnable{
     // volatile = a field might be modified by multiple threads that are executing at the same time, for scope
     // in case we're using multiple threads, the variable is visible and able to be updated by other threads
     volatile boolean playing;
+
+    /*
+    // too large
+    //Bitmap background = BitmapFactory.decodeResource(getResources(), R.drawable.background_icecreamshop);
+    ImageView imageView = (ImageView) findViewById(R.id.imageView);
+    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+    Bitmap background = drawable.getBitmap();*/
 
     // the game thread
     private Thread gameThread = null;
@@ -242,6 +253,7 @@ public class GameView extends SurfaceView implements Runnable{
                 //ob.setVisible(false);
 
                 // test rectangle should flash green briefly
+                // isHit stays true after last object is removed
                 System.out.println("Hit!");
                 isHit = true;
                 System.out.println("Removing obstacle at index " + i);
@@ -275,11 +287,16 @@ public class GameView extends SurfaceView implements Runnable{
             // draw a background color for canvas
             // right now using transparent
             // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            // canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            //canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
+            //canvas.drawColor(Color.argb(255, 255,218,185));   // peach
+            canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
+            //canvas.drawBitmap(background, 0, 0, paint);
 
             // we want the moving rectangle and bitmap to overlap the
             // static one, so draw static test rect first
 
+            /*
             // draw test rectangle
             if (isHit)
             {
@@ -292,6 +309,7 @@ public class GameView extends SurfaceView implements Runnable{
                 paint.setStyle(Paint.Style.STROKE);
             }
             canvas.drawRect(rect2, paint);
+            */
             // restore paint to default settings for bitmap
             // paint.reset();
 

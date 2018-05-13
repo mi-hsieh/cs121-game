@@ -27,7 +27,7 @@ public class DownButton {
         // Getting bitmap from drawable resource
         // currently using default png
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.down);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.arrow_04_down);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
