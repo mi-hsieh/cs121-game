@@ -33,15 +33,15 @@ public class Stamina {
             e.printStackTrace();
         }
 
-        width = 50;
-        height = 50;
+        width = 100;    //50;
+        height = 100;   //50;
 
         // initial coordinates
         // x + player width
-        x = GameView.getScreenWidth()/2;    //1200  + (300);
+        x = GameView.getScreenWidth()/2 - 500;    //1200  + (300);
         // we want the middle tile centered with the player
         // so the top tile is 2*height above the player
-        y = (GameView.getScreenWidth()/2) - (23*height);    // 75;
+        y = (GameView.getScreenWidth()/2) - (12*height); //(23*height);
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {

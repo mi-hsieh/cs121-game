@@ -2,19 +2,15 @@ package com.dagame.example.journeyu;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -71,6 +67,12 @@ public class GameView extends SurfaceView implements Runnable{
 
     int numStamina;
 
+    // movement smoothing for character
+    // is equal to 0 or 1 depending on if touch event occurred
+    // used in if-statement functionality to trigger the movement animation in update()
+    int moveDown = 0;
+    int moveUp = 0;
+    int charFrameCount = -1;
 
     /*
          public Rect (int left, int top, int right, int bottom)
@@ -252,7 +254,7 @@ public class GameView extends SurfaceView implements Runnable{
 
                 //ob.setVisible(false);
 
-                // test rectangle should flash green briefly
+                // test rectangle, if drawn, should flash green briefly
                 // isHit stays true after last object is removed
                 System.out.println("Hit!");
                 isHit = true;
@@ -275,6 +277,40 @@ public class GameView extends SurfaceView implements Runnable{
                 obstacles.remove(i);
             }
         }
+
+        if(moveUp==1){
+            charFrameCount++;
+            if(charFrameCount<=5){
+                player.setY((player.getY() - 14));
+            }
+            if(charFrameCount>5 && charFrameCount<=10){
+                player.setY((player.getY() - 18));
+            }
+            if(charFrameCount>10 && charFrameCount<=15){
+                player.setY((player.getY() - 8));
+            }
+            if(charFrameCount==16){
+                charFrameCount=-1;
+                moveUp=0;
+            }
+        }
+
+        if(moveDown==1){
+            charFrameCount++;
+            if(charFrameCount<=5){
+                player.setY((player.getY() + 14));
+            }
+            if(charFrameCount>5 && charFrameCount<=10){
+                player.setY((player.getY() + 18));
+            }
+            if(charFrameCount>10 && charFrameCount<=15){
+                player.setY((player.getY() + 8));
+            }
+            if(charFrameCount==16){
+                charFrameCount=-1;
+                moveDown=0;
+            }
+        }
     }
 
     private void draw() {
@@ -288,9 +324,10 @@ public class GameView extends SurfaceView implements Runnable{
             // right now using transparent
             // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
             // canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            //canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
+            canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
             //canvas.drawColor(Color.argb(255, 255,218,185));   // peach
-            canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
+            //canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
+            //canvas.drawColor(Color.BLACK);    // black
             //canvas.drawBitmap(background, 0, 0, paint);
 
             // we want the moving rectangle and bitmap to overlap the
@@ -436,19 +473,31 @@ public class GameView extends SurfaceView implements Runnable{
                     // don't move if player would be above top platform, also assuming platforms initialized
                     if (player.getY() > tiles.get(0).getY()) {
                         if (numStamina > 0) {
-                            player.setY(player.getY() - 200);
-                            numStamina--;
-                            stamina.remove(stamina.size() - 1);
+                            //player.setY(player.getY() - 200);
+                            if((charFrameCount==-1)&&(moveUp==0)){
+                                moveUp = 1;
+                                charFrameCount = 0;
+
+                                numStamina--;
+                                stamina.remove(stamina.size() - 1);
+                            }
                         }
                     }
                 }
+
                 if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
                     // don't move if player would be below bottom platform
                     if (player.getY() < tiles.get(tiles.size()-1).getY()) {
                         if (numStamina > 0) {
-                            player.setY(player.getY() + 200);
-                            numStamina--;
-                            stamina.remove(stamina.size() - 1);
+                            //player.setY(player.getY() + 200);
+                            if((charFrameCount==-1)&&(moveDown==0)){
+                                moveDown = 1;
+                                charFrameCount = 0;
+
+                                numStamina--;
+                                stamina.remove(stamina.size() - 1);
+                            }
+
                         }
                     }
                 }
