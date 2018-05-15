@@ -13,7 +13,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
-import java.util.Random;
+//import java.util.Random;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -216,9 +216,9 @@ public class GameView extends SurfaceView implements Runnable{
 
         // update obstacle position
         for (Obstacle1 ob : obstacles) {
-            if (ob.isVisible()) {
+            //if (ob.isVisible()) {
                 ob.update();
-            }
+            //}
         }
 
         // DETECT COLLISIONS HERE
@@ -245,7 +245,7 @@ public class GameView extends SurfaceView implements Runnable{
         for (int i = 0; i < obstacles.size(); i++)
         {
             ob = obstacles.get(i);
-            if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) && ob.isVisible())
+            if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) ) //&& ob.isVisible())
             {
                 /*if (stamina.size() > 0) {
                         stamina.remove(stamina.get(stamina.size() - 1));
@@ -273,7 +273,7 @@ public class GameView extends SurfaceView implements Runnable{
         {
             if (obstacles.get(i).getX() >= GameView.getScreenWidth())
             {
-                obstacles.get(i).setVisible(false);
+                //obstacles.get(i).setVisible(false);
                 obstacles.remove(i);
             }
         }
@@ -324,10 +324,13 @@ public class GameView extends SurfaceView implements Runnable{
             // right now using transparent
             // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
             // canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
+
+            // random colors for background
+            //canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
             //canvas.drawColor(Color.argb(255, 255,218,185));   // peach
             //canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
             //canvas.drawColor(Color.BLACK);    // black
+            canvas.drawColor(Color.argb(255, 0,0,128));   // navy blue
             //canvas.drawBitmap(background, 0, 0, paint);
 
             // we want the moving rectangle and bitmap to overlap the
@@ -369,21 +372,6 @@ public class GameView extends SurfaceView implements Runnable{
                     paint
             );
 
-            //draw upButton
-            canvas.drawBitmap(
-                    upButton.getBitmap(),
-                    upButton.getX(),
-                    upButton.getY(),
-                    paint
-            );
-
-            //draw downButton
-            canvas.drawBitmap(
-                    downButton.getBitmap(),
-                    downButton.getX(),
-                    downButton.getY(),
-                    paint
-            );
             //draw stamina
             for (Stamina s : stamina)
             canvas.drawBitmap(
@@ -400,24 +388,40 @@ public class GameView extends SurfaceView implements Runnable{
             canvas.drawRect(player.getCollisionRect(), paint);
 
             for (Obstacle1 ob : obstacles) {
-                if (ob.isVisible()) {
+                //if (ob.isVisible()) {
                     canvas.drawBitmap(
                             ob.getBitmap(),
                             ob.getX(),
                             ob.getY(),
                             paint
                     );
-                }
+                //}
             }
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.MAGENTA);
             for (Obstacle1 ob : obstacles) {
                 // draw the corresponding obstacle rectangle
-                if (ob.isVisible()) {
+                //if (ob.isVisible()) {
                     canvas.drawRect(ob.getCollisionRect(), paint);
-                }
+                //}
             }
+
+            //draw upButton
+            canvas.drawBitmap(
+                    upButton.getBitmap(),
+                    upButton.getX(),
+                    upButton.getY(),
+                    paint
+            );
+
+            //draw downButton
+            canvas.drawBitmap(
+                    downButton.getBitmap(),
+                    downButton.getX(),
+                    downButton.getY(),
+                    paint
+            );
 
             // restore paint to default settings for next frame
             // paint.reset();
