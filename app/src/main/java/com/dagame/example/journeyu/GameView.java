@@ -2,6 +2,8 @@ package com.dagame.example.journeyu;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -26,10 +28,11 @@ public class GameView extends SurfaceView implements Runnable{
     // in case we're using multiple threads, the variable is visible and able to be updated by other threads
     volatile boolean playing;
 
-    /*
+
     // too large
-    //Bitmap background = BitmapFactory.decodeResource(getResources(), R.drawable.background_icecreamshop);
-    ImageView imageView = (ImageView) findViewById(R.id.imageView);
+    //Bitmap background = BitmapFactory.decodeResource(getResources(), R.drawable.bg1);
+    Bitmap background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.bg1), getScreenWidth(), getScreenHeight(), true);
+    /*ImageView imageView = (ImageView) findViewById(R.id.imageView);
     BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
     Bitmap background = drawable.getBitmap();*/
 
@@ -497,15 +500,15 @@ public class GameView extends SurfaceView implements Runnable{
             // draw a background color for canvas
             // right now using transparent
             // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
-            // canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
             // random colors for background
             //canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
             //canvas.drawColor(Color.argb(255, 255,218,185));   // peach
             //canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
             //canvas.drawColor(Color.BLACK);    // black
-            canvas.drawColor(Color.argb(255, 0,0,128));   // navy blue
-            //canvas.drawBitmap(background, 0, 0, paint);
+            //canvas.drawColor(Color.argb(255, 0,0,128));   // navy blue
+            canvas.drawBitmap(background, 0, 0, paint);
 
             // we want the moving rectangle and bitmap to overlap the
             // static one, so draw static test rect first
