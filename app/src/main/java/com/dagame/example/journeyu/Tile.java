@@ -29,7 +29,6 @@ public class Tile {
     public Tile(Context context) {
 
         // Getting bitmap from drawable resource
-        // currently using default png
         try {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.cookie);
         } catch (Exception e)

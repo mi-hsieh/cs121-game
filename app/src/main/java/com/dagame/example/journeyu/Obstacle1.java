@@ -6,15 +6,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 
-public class Obstacle1 {
-    //Bitmap to get character from image
+public class Obstacle1 extends Obstacle {
+    //Bitmap to get cone from image
     private Bitmap bitmap;
 
     //desired width and height of Bitmap
     private int width;
     private int height;
 
-    //Rectangle hit box for the character
+    //Rectangle hit box for the cone
     private Rect rect;
 
     //coordinates
@@ -31,7 +31,6 @@ public class Obstacle1 {
     public Obstacle1(Context context) {
 
         // Getting bitmap from drawable resource
-        // currently using default png
         try {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icream_cone_sharp);
         } catch (Exception e)
@@ -46,7 +45,7 @@ public class Obstacle1 {
         //System.out.println("Bitmap width and height: " + width + " " + height);
 
         // initial coordinates
-        x = 0;  //1200  + width;
+        x = -width;  //1200  + width;
         y = 0;  //GameView.getScreenHeight()/2 - height;
         speed = 5;
 
@@ -76,9 +75,19 @@ public class Obstacle1 {
     }
 
     // method to update coordinate of character
-    public void update(){
+    // new parameter added
+    public void update(int obsFrameCount){
         //updating x coordinate
-        x+=speed;
+        // x+=speed;
+        if(obsFrameCount<=5){
+            setX((getX() + 14));
+        }
+        if(obsFrameCount>5 && obsFrameCount<=10){
+            setX((getX() + 20));
+        }
+        if(obsFrameCount>10 && obsFrameCount<=15){
+            setX((getX() + 6));
+        }
 
         //adding top, left, bottom and right to the rect object
         rect.left = x;

@@ -60,10 +60,16 @@ public class GameView extends SurfaceView implements Runnable{
     // number of tiles
     int numTiles;
 
-    // adding Obstacle
-    private ArrayList<Obstacle1> obstacles = new ArrayList<Obstacle1>();
+    // adding obstacles
+    private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 
     int numObstacles;
+
+    // the current column - includes empty columns
+    int currentCol = 0;
+
+    // the current "wave" - segment
+    int wave;
 
     int numStamina;
 
@@ -73,6 +79,19 @@ public class GameView extends SurfaceView implements Runnable{
     int moveDown = 0;
     int moveUp = 0;
     int charFrameCount = -1;
+
+    // animation count for character
+    int aniFrameCol = 0;
+    int aniFrameRow = 0;
+    int aniFrameDelay = 0;
+
+    // movement smoothing for obstacle
+    // because not based on onTouch event, we use a a timer that activates movement when obsTimer%35
+    int obsTimer = 0;
+    int obsFrameCount = 0;
+    int obsFrameStart = 0;
+
+    public Rect PlayerAniFrame = new Rect(0, 0, 370, 236);
 
     /*
          public Rect (int left, int top, int right, int bottom)
@@ -151,27 +170,71 @@ public class GameView extends SurfaceView implements Runnable{
             //shiftY += 10;
         }
 
-        // Random r = new Random();
-        int randInt = 0;
+        // positions of obstacles based on tiles positions
+        // 0 - 4 for the 5 tiles, from top to bottom
+        int pos0 = tiles.get(0).getY();
+        int pos1 = tiles.get(1).getY();
+        int pos2 = tiles.get(2).getY();
+        int pos3 = tiles.get(3).getY();
+        int pos4 = tiles.get(4).getY();
 
-        numObstacles = 5;
+        // Random r = new Random();
+
+        numObstacles = 6;
+
+
+        /*
+        int pos = 0;
+
         for (int i = 0; i < numObstacles; i++)
         {
             Obstacle1 ob = new Obstacle1(context);
 
             // option 1
             // random obstacle y positions
-            /* gives a random integer between min (inclusive) and max (exclusive)
-            // int i1 = r.nextInt(max - min + 1) + min; */
+            // gives a random integer between min (inclusive) and max (exclusive)
+            // int i1 = r.nextInt(max - min + 1) + min;
             // ex. randInt = r.nextInt(80 - 65) + 65;
             // randInt = r.nextInt((GameView.getScreenHeight()-ob.getHeight()) - 0 + 1) + 0;
 
             // option 2
             // the obstacles are aligned with the tiles (tile 0 is the top tile)
-            randInt = tiles.get(i).getY();
-            ob.setY(randInt);
+            pos = tiles.get(i).getY();
+            ob.setY(pos);
             obstacles.add(ob);
         }
+        */
+
+        // initialize wave 1
+
+        Obstacle1 ob1;  // cone
+        ob1 = new Obstacle1(context);
+        ob1.setY(pos2);
+        obstacles.add(ob1);
+
+        Obstacle2 ob2;  // brick
+        ob2 = new Obstacle2(context);
+        ob2.setY(pos1);
+        obstacles.add(ob2);
+        // add another brick
+        ob2 = new Obstacle2(context);
+        ob2.setY(pos3);
+        obstacles.add(ob2);
+
+        ob1 = new Obstacle1(context);
+        ob1.setY(pos0);
+        obstacles.add(ob1);
+        ob1 = new Obstacle1(context);
+        ob1.setY(pos4);
+        obstacles.add(ob1);
+
+        Obstacle3 ob3;  // wall
+        ob3 = new Obstacle3(context);
+        ob3.setY(pos1);
+        obstacles.add(ob3);
+
+        wave = 1;
+
 
     }
 
@@ -214,11 +277,117 @@ public class GameView extends SurfaceView implements Runnable{
         // update the player position
         player.update();
 
+        obsTimer++;
+
+        // iterates through frames of spritesheet
+        if (aniFrameRow == 0) {
+            aniFrameCol++;
+            aniFrameRow++;
+        } else {
+            aniFrameCol++;
+        }
+
+        // check if sprite location is within bounds of sprite sheet
+        if (aniFrameCol > 5) {
+            aniFrameRow++;
+            aniFrameCol = 1;
+            PlayerAniFrame.top += 236;
+            PlayerAniFrame.bottom += 236;
+        }
+        if (aniFrameRow == 9 && aniFrameCol == 5) {
+            aniFrameRow = 1;
+            aniFrameCol = 1;
+        }
+        if (aniFrameRow == 1) {
+            PlayerAniFrame.top = 0;
+            PlayerAniFrame.bottom = 236;
+        }
+        if (aniFrameCol == 1) {
+            PlayerAniFrame.left = 0;
+            PlayerAniFrame.right = 370;
+        }
+        if (aniFrameCol > 1) {
+            PlayerAniFrame.left += 370;
+            PlayerAniFrame.right += 370;
+        }
+
         // update obstacle position
-        for (Obstacle1 ob : obstacles) {
-            //if (ob.isVisible()) {
-                ob.update();
-            //}
+        if(obsTimer%35==0){
+            obsFrameStart=1;
+            obsFrameCount=0;
+
+            // we've reached the next column
+            currentCol++;
+        }
+        if(obsFrameStart==1){
+            if(obsTimer==25){
+                obsTimer=0;
+            }
+            obsFrameCount++;
+            for (int i = 0; i < obstacles.size(); i++) {
+                /* moved to the obstacle classes, in update
+                if(obsFrameCount<=5){
+                    ob.setX((ob.getX() + 14));
+                }
+                if(obsFrameCount>5 && obsFrameCount<=10){
+                    ob.setX((ob.getX() + 20));
+                }
+                if(obsFrameCount>10 && obsFrameCount<=15){
+                    ob.setX((ob.getX() + 6));
+                }*/
+
+                //ob.update(obsFrameCount);
+
+                if(obsFrameCount==16){
+                    obsFrameStart=0;
+                }
+            }
+
+                if (currentCol >= 0 && numObstacles == 6)
+                {
+                    obstacles.get(0).update(obsFrameCount);
+                }
+                if (currentCol >= 4 && numObstacles == 6)
+                {
+                    obstacles.get(1).update(obsFrameCount);
+                    obstacles.get(2).update(obsFrameCount);
+                }
+                else if (currentCol >= 4 && numObstacles == 5)
+                {
+                    obstacles.get(0).update(obsFrameCount);
+                    obstacles.get(1).update(obsFrameCount);
+                }
+                if (currentCol >= 7 && numObstacles == 6)
+                {
+                    obstacles.get(3).update(obsFrameCount);
+                    obstacles.get(4).update(obsFrameCount);
+                }
+                else if (currentCol >= 7 && numObstacles == 5)
+                {
+                    obstacles.get(2).update(obsFrameCount);
+                    obstacles.get(3).update(obsFrameCount);
+                }
+                else if (currentCol >= 7 && numObstacles == 3)
+                {
+                    obstacles.get(0).update(obsFrameCount);
+                    obstacles.get(1).update(obsFrameCount);
+                }
+                if (currentCol >= 10 && numObstacles == 6)
+                {
+                    obstacles.get(5).update(obsFrameCount);
+                }
+                else if (currentCol >= 10 && numObstacles == 5)
+                {
+                    obstacles.get(4).update(obsFrameCount);
+                }
+                else if (currentCol >= 10 && numObstacles == 3)
+                {
+                    obstacles.get(2).update(obsFrameCount);
+                }
+                else if (currentCol >= 10 && numObstacles == 1)
+                {
+                    obstacles.get(0).update(obsFrameCount);
+                }
         }
 
         // DETECT COLLISIONS HERE
@@ -240,7 +409,7 @@ public class GameView extends SurfaceView implements Runnable{
         }
         */
 
-        Obstacle1 ob;
+        Obstacle ob;
 
         for (int i = 0; i < obstacles.size(); i++)
         {
@@ -258,8 +427,9 @@ public class GameView extends SurfaceView implements Runnable{
                 // isHit stays true after last object is removed
                 System.out.println("Hit!");
                 isHit = true;
-                System.out.println("Removing obstacle at index " + i);
+                System.out.println("Obstacle at index " + i + " collided. Removing.");
                 obstacles.remove(ob);
+                numObstacles--;
             }
             else
             {
@@ -274,7 +444,9 @@ public class GameView extends SurfaceView implements Runnable{
             if (obstacles.get(i).getX() >= GameView.getScreenWidth())
             {
                 //obstacles.get(i).setVisible(false);
+                System.out.println("End of screen reached. Destroying obstacle at index " + i);
                 obstacles.remove(i);
+                numObstacles--;
             }
         }
 
@@ -311,6 +483,8 @@ public class GameView extends SurfaceView implements Runnable{
                 moveDown=0;
             }
         }
+
+        player.update();
     }
 
     private void draw() {
@@ -367,8 +541,8 @@ public class GameView extends SurfaceView implements Runnable{
             // draw the player
             canvas.drawBitmap(
                     player.getBitmap(),
-                    player.getX(),
-                    player.getY(),
+                    PlayerAniFrame,
+                    player.getCollisionRect(),
                     paint
             );
 
@@ -387,7 +561,7 @@ public class GameView extends SurfaceView implements Runnable{
             // draw the corresponding player rectangle
             canvas.drawRect(player.getCollisionRect(), paint);
 
-            for (Obstacle1 ob : obstacles) {
+            for (Obstacle ob : obstacles) {
                 //if (ob.isVisible()) {
                     canvas.drawBitmap(
                             ob.getBitmap(),
@@ -400,8 +574,12 @@ public class GameView extends SurfaceView implements Runnable{
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.MAGENTA);
-            for (Obstacle1 ob : obstacles) {
+            //for (Obstacle ob : obstacles) {
+            Obstacle ob;
+            for (int i = 0; i < numObstacles; i++)
+            {
                 // draw the corresponding obstacle rectangle
+                ob = obstacles.get(i);
                 //if (ob.isVisible()) {
                     canvas.drawRect(ob.getCollisionRect(), paint);
                 //}

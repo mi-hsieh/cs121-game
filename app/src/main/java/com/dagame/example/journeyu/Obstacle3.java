@@ -4,60 +4,53 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 
-/**
- * Created by Michael on 4/24/2018.
- */
 
-public class Player {
-
-    //Bitmap to get character from image
+public class Obstacle3 extends Obstacle {
+    //Bitmap to get wall from image
     private Bitmap bitmap;
 
     //desired width and height of Bitmap
     private int width;
     private int height;
 
-    //Rectangle hit box for the character
+    //Rectangle hit box for the wall
     private Rect rect;
 
     //coordinates
     private int x;
     private int y;
 
-    //motion speed of the character
+    // whether the obstacle is drawable or not, default false
+    private boolean visible;
+
+    //motion speed of the wall
     private int speed = 0;
 
     //constructor
-    public Player(Context context) {
+    public Obstacle3(Context context) {
 
         // Getting bitmap from drawable resource
         try {
-            //BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.icecream_ball_mintchoco, null);
-            /*BitmapDrawable drawable = (BitmapDrawable) ContextCompat.getDrawable(context, R.drawable.icecream_ball_mintchoco);
-            bitmap = drawable.getBitmap();*/
-            // bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icecream_ball_mintchoco);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inScaled = false;
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.icecream_flying_03_spritesheet, options);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.brickwall_2wide);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
             e.printStackTrace();
         }
 
-        width = 200;
+        width = 400;
         height = 200;
 
         //System.out.println("Bitmap width and height: " + width + " " + height);
 
         // initial coordinates
-        x = 1600;   //orig 75
-        y = GameView.getScreenHeight()/2 - height;     //orig 50
-        speed = 1;
+        x = -width;
+        y = 0;
+        speed = 5;
+
+        // set visibility to true
+        visible = true;
 
         /*
         Bitmap createScaledBitmap (Bitmap src,
@@ -67,33 +60,43 @@ public class Player {
         */
 
         // get a scaled bitmap (if the bitmap is too big or small)
-        /*try {
+        try {
             bitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
         }
         catch (Exception e)
         {
             System.out.println("Could not get scaled bitmap");
             e.printStackTrace();
-        }*/
+        }
 
         // Rectangle object for collision
-        rect = new Rect(x, y, x + 314, y + height);
+        rect = new Rect(x, y, x + width, y + height);
 
     }
 
     // method to update coordinate of character
-    public void update(){
+    public void update(int obsFrameCount){
         //updating x coordinate
-        //x+=10;
+        // x+=speed;
+
+        if(obsFrameCount<=5){
+            setX((getX() + 14));
+        }
+        if(obsFrameCount>5 && obsFrameCount<=10){
+            setX((getX() + 20));
+        }
+        if(obsFrameCount>10 && obsFrameCount<=15){
+            setX((getX() + 6));
+        }
 
         //adding top, left, bottom and right to the rect object
         rect.left = x;
         rect.top = y;
-        rect.right = x + 314; //bitmap.getWidth();
+        rect.right = x + width; //bitmap.getWidth();
         rect.bottom = y + height; //bitmap.getHeight();
     }
 
-    // access methods
+    // access and getter methods
 
     public Bitmap getBitmap() {
         return bitmap;
@@ -107,9 +110,19 @@ public class Player {
         return y;
     }
 
-    public void setX(int a) { x = rect.left = a; rect.right = x + width; }
+    public void setX(int a) { x = a; }
 
-    public void setY(int b) { y = rect.top = b; rect.bottom = y + height; }
+    public void setY(int a) { y = a; }
+
+    public boolean isVisible()
+    {
+        return visible;
+    }
+
+    public void setVisible(boolean v)
+    {
+        visible = v;
+    }
 
     public int getSpeed() {
         return speed;
@@ -130,3 +143,11 @@ public class Player {
     }
 
 }
+
+
+
+
+
+
+
+
