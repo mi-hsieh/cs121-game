@@ -214,27 +214,34 @@ public class GameView extends SurfaceView implements Runnable{
         ob1 = new Obstacle1(context);
         ob1.setY(pos2);
         obstacles.add(ob1);
+        obstacles.get(0).setID(1);
 
         Obstacle2 ob2;  // brick
         ob2 = new Obstacle2(context);
         ob2.setY(pos1);
         obstacles.add(ob2);
+        obstacles.get(1).setID(2);
         // add another brick
         ob2 = new Obstacle2(context);
         ob2.setY(pos3);
         obstacles.add(ob2);
+        obstacles.get(2).setID(3);
 
+        // add 2 more cones
         ob1 = new Obstacle1(context);
         ob1.setY(pos0);
         obstacles.add(ob1);
+        obstacles.get(3).setID(4);
         ob1 = new Obstacle1(context);
         ob1.setY(pos4);
         obstacles.add(ob1);
+        obstacles.get(4).setID(5);
 
         Obstacle3 ob3;  // wall
         ob3 = new Obstacle3(context);
         ob3.setY(pos1);
         obstacles.add(ob3);
+        obstacles.get(5).setID(6);
 
         wave = 1;
 
@@ -327,7 +334,7 @@ public class GameView extends SurfaceView implements Runnable{
                 obsTimer=0;
             }
             obsFrameCount++;
-            for (int i = 0; i < obstacles.size(); i++) {
+            for (Obstacle ob : obstacles) {
                 /* moved to the obstacle classes, in update
                 if(obsFrameCount<=5){
                     ob.setX((ob.getX() + 14));
@@ -341,11 +348,38 @@ public class GameView extends SurfaceView implements Runnable{
 
                 //ob.update(obsFrameCount);
 
+                // Note the extra parameter
+                if (currentCol >= 0 && ob.getID() == 1)
+                {
+                    ob.update(obsFrameCount);
+                }
+                if (currentCol >= 4 && ob.getID() == 2)
+                {
+                    ob.update(obsFrameCount);
+                }
+                if (currentCol >= 4 && ob.getID() == 3)
+                {
+                    ob.update(obsFrameCount);
+                }
+                if (currentCol >= 7 && ob.getID() == 4)
+                {
+                    ob.update(obsFrameCount);
+                }
+                if (currentCol >= 7 && ob.getID() == 5)
+                {
+                    ob.update(obsFrameCount);
+                }
+                if (currentCol >= 10 && ob.getID() == 6)
+                {
+                    ob.update(obsFrameCount);
+                }
+
                 if(obsFrameCount==16){
                     obsFrameStart=0;
                 }
             }
 
+                /* Previous attempt at moving objects for waves
                 if (currentCol >= 0 && numObstacles == 6)
                 {
                     obstacles.get(0).update(obsFrameCount);
@@ -390,7 +424,7 @@ public class GameView extends SurfaceView implements Runnable{
                 else if (currentCol >= 10 && numObstacles == 1)
                 {
                     obstacles.get(0).update(obsFrameCount);
-                }
+                }*/
         }
 
         // DETECT COLLISIONS HERE

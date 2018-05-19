@@ -11,6 +11,11 @@ import android.graphics.Rect;
 
 public abstract class Obstacle {
 
+    // keeps track of individual objects
+    // object position will change if other objects are removed or added
+
+    private int ID = 0;
+
     public abstract void update(int frame);
 
     public abstract Bitmap getBitmap();
@@ -28,4 +33,14 @@ public abstract class Obstacle {
     public abstract int getWidth();
 
     public abstract int getHeight();
+
+    public void setID(int id)
+    {
+        ID = id;
+    }
+
+    public int getID()
+    {
+        return ID;
+    }
 }
