@@ -24,7 +24,7 @@ public class Obstacle1 extends Obstacle {
     // whether the obstacle is drawable or not, default false
     private boolean visible;
 
-    //motion speed of the character
+    //motion speed of the cone
     private int speed = 0;
 
     //constructor
@@ -41,8 +41,6 @@ public class Obstacle1 extends Obstacle {
 
         width = 200;
         height = 200;
-
-        //System.out.println("Bitmap width and height: " + width + " " + height);
 
         // initial coordinates
         x = -width;  //1200  + width;

@@ -7,12 +7,13 @@ import android.graphics.Rect;
  * Created by Michael on 5/14/2018.
  */
 
-// abstract class - not fully implemented yet
+// abstract class - not fully implemented yet, some methods can be moved here
 
 public abstract class Obstacle {
 
     // keeps track of individual objects
     // object position will change if other objects are removed or added
+    // ID normally starts at 1, meaning 1st obstacle of an array
 
     private int ID = 0;
 

@@ -15,7 +15,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
-//import java.util.Random;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -28,13 +27,7 @@ public class GameView extends SurfaceView implements Runnable{
     // in case we're using multiple threads, the variable is visible and able to be updated by other threads
     volatile boolean playing;
 
-
-    // too large
-    //Bitmap background = BitmapFactory.decodeResource(getResources(), R.drawable.bg1);
     Bitmap background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.bg1), getScreenWidth(), getScreenHeight(), true);
-    /*ImageView imageView = (ImageView) findViewById(R.id.imageView);
-    BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-    Bitmap background = drawable.getBitmap();*/
 
     // the game thread
     private Thread gameThread = null;
@@ -112,11 +105,9 @@ public class GameView extends SurfaceView implements Runnable{
 
     //private static final String TAG = "Rectangle";
     // a test rectangle
-    private Rect rect2 = new Rect(1000, 50, 1300, 350);
+    // private Rect rect2 = new Rect(1000, 50, 1300, 350);
 
     private boolean isHit = false;
-    // time objects are intersecting
-    // private int hitTime = 0;
 
     /* The Canvas class holds the "draw" calls.
     To draw something, you need 4 basic components: A Bitmap to hold the pixels,
@@ -158,7 +149,7 @@ public class GameView extends SurfaceView implements Runnable{
             stamina.add(s);
             s.shiftRight(shiftX);
             shiftX += s.getWidth();
-            //spacing between staminas
+            //spacing between stamina
             //shiftX += 10;
         }
 
@@ -173,7 +164,7 @@ public class GameView extends SurfaceView implements Runnable{
             //shiftY += 10;
         }
 
-        // positions of obstacles based on tiles positions
+        // positions of obstacles based on tile positions
         // 0 - 4 for the 5 tiles, from top to bottom
         int pos0 = tiles.get(0).getY();
         int pos1 = tiles.get(1).getY();
@@ -181,34 +172,11 @@ public class GameView extends SurfaceView implements Runnable{
         int pos3 = tiles.get(3).getY();
         int pos4 = tiles.get(4).getY();
 
-        // Random r = new Random();
-
         numObstacles = 6;
 
-
-        /*
-        int pos = 0;
-
-        for (int i = 0; i < numObstacles; i++)
-        {
-            Obstacle1 ob = new Obstacle1(context);
-
-            // option 1
-            // random obstacle y positions
-            // gives a random integer between min (inclusive) and max (exclusive)
-            // int i1 = r.nextInt(max - min + 1) + min;
-            // ex. randInt = r.nextInt(80 - 65) + 65;
-            // randInt = r.nextInt((GameView.getScreenHeight()-ob.getHeight()) - 0 + 1) + 0;
-
-            // option 2
-            // the obstacles are aligned with the tiles (tile 0 is the top tile)
-            pos = tiles.get(i).getY();
-            ob.setY(pos);
-            obstacles.add(ob);
-        }
-        */
-
         // initialize wave 1
+
+        // IDs start from 1
 
         Obstacle1 ob1;  // cone
         ob1 = new Obstacle1(context);
@@ -248,7 +216,6 @@ public class GameView extends SurfaceView implements Runnable{
 
     }
 
-
     /* A class that implements Runnable can run without subclassing Thread by
     instantiating a Thread instance and passing itself in as the target. In most cases, the
     Runnable interface should be used if you are only planning to
@@ -258,12 +225,6 @@ public class GameView extends SurfaceView implements Runnable{
     /* When an object implementing interface Runnable is used to create a thread,
     starting the thread causes the object's run method to be called
     in that separately executing thread.
-     */
-
-    /* run()
-    If this thread was constructed using a separate Runnable run object, then
-    that Runnable object's run method is called; otherwise, this method does
-    nothing and returns.
      */
 
     // Using Runnable, so need to implement run()
@@ -289,7 +250,7 @@ public class GameView extends SurfaceView implements Runnable{
 
         obsTimer++;
 
-        // iterates through frames of spritesheet
+        // iterates through frames of sprite sheet
         if (aniFrameRow == 0) {
             aniFrameCol++;
             aniFrameRow++;
@@ -346,8 +307,6 @@ public class GameView extends SurfaceView implements Runnable{
                     ob.setX((ob.getX() + 6));
                 }*/
 
-                //ob.update(obsFrameCount);
-
                 // Note the extra parameter
                 if (currentCol >= 0 && ob.getID() == 1)
                 {
@@ -379,66 +338,16 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
 
-                /* Previous attempt at moving objects for waves
-                if (currentCol >= 0 && numObstacles == 6)
-                {
-                    obstacles.get(0).update(obsFrameCount);
-                }
-                if (currentCol >= 4 && numObstacles == 6)
-                {
-                    obstacles.get(1).update(obsFrameCount);
-                    obstacles.get(2).update(obsFrameCount);
-                }
-                else if (currentCol >= 4 && numObstacles == 5)
-                {
-                    obstacles.get(0).update(obsFrameCount);
-                    obstacles.get(1).update(obsFrameCount);
-                }
-                if (currentCol >= 7 && numObstacles == 6)
-                {
-                    obstacles.get(3).update(obsFrameCount);
-                    obstacles.get(4).update(obsFrameCount);
-                }
-                else if (currentCol >= 7 && numObstacles == 5)
-                {
-                    obstacles.get(2).update(obsFrameCount);
-                    obstacles.get(3).update(obsFrameCount);
-                }
-                else if (currentCol >= 7 && numObstacles == 3)
-                {
-                    obstacles.get(0).update(obsFrameCount);
-                    obstacles.get(1).update(obsFrameCount);
-                }
-                if (currentCol >= 10 && numObstacles == 6)
-                {
-                    obstacles.get(5).update(obsFrameCount);
-                }
-                else if (currentCol >= 10 && numObstacles == 5)
-                {
-                    obstacles.get(4).update(obsFrameCount);
-                }
-                else if (currentCol >= 10 && numObstacles == 3)
-                {
-                    obstacles.get(2).update(obsFrameCount);
-                }
-                else if (currentCol >= 10 && numObstacles == 1)
-                {
-                    obstacles.get(0).update(obsFrameCount);
-                }*/
         }
 
         // DETECT COLLISIONS HERE
-        /*
+
+        /* Old code for test rectangle
         if (Rect.intersects(player.getCollisionRect(), rect2)) {
 
             // Intersects player bounding rectangle
             isHit = true;
 
-            Log.d(TAG, "Intersection successful.");
-            System.out.println("Player rect x and y: " + player.getCollisionRect().left
-                    + " " + player.getCollisionRect().top);
-            System.out.println("Test rect x and y: " + rect2.left
-                    + " " + rect2.top);
         }
         else
         {
@@ -451,14 +360,12 @@ public class GameView extends SurfaceView implements Runnable{
         for (int i = 0; i < obstacles.size(); i++)
         {
             ob = obstacles.get(i);
-            if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) ) //&& ob.isVisible())
+            if (Rect.intersects(player.getCollisionRect(), ob.getCollisionRect()) )
             {
                 /*if (stamina.size() > 0) {
                         stamina.remove(stamina.get(stamina.size() - 1));
                         numStamina--;
                 }*/
-
-                //ob.setVisible(false);
 
                 // test rectangle, if drawn, should flash green briefly
                 // isHit stays true after last object is removed
@@ -542,6 +449,7 @@ public class GameView extends SurfaceView implements Runnable{
             //canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
             //canvas.drawColor(Color.BLACK);    // black
             //canvas.drawColor(Color.argb(255, 0,0,128));   // navy blue
+
             canvas.drawBitmap(background, 0, 0, paint);
 
             // we want the moving rectangle and bitmap to overlap the
@@ -561,8 +469,6 @@ public class GameView extends SurfaceView implements Runnable{
             }
             canvas.drawRect(rect2, paint);
             */
-            // restore paint to default settings for bitmap
-            // paint.reset();
 
             // draw the tiles
             for (Tile t : tiles)
@@ -599,27 +505,22 @@ public class GameView extends SurfaceView implements Runnable{
             canvas.drawRect(player.getCollisionRect(), paint);
 
             for (Obstacle ob : obstacles) {
-                //if (ob.isVisible()) {
                     canvas.drawBitmap(
                             ob.getBitmap(),
                             ob.getX(),
                             ob.getY(),
                             paint
                     );
-                //}
             }
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.MAGENTA);
-            //for (Obstacle ob : obstacles) {
             Obstacle ob;
             for (int i = 0; i < numObstacles; i++)
             {
                 // draw the corresponding obstacle rectangle
                 ob = obstacles.get(i);
-                //if (ob.isVisible()) {
-                    canvas.drawRect(ob.getCollisionRect(), paint);
-                //}
+                canvas.drawRect(ob.getCollisionRect(), paint);
             }
 
             //draw upButton
@@ -692,7 +593,7 @@ public class GameView extends SurfaceView implements Runnable{
                     // don't move if player would be above top platform, also assuming platforms initialized
                     if (player.getY() > tiles.get(0).getY()) {
                         if (numStamina > 0) {
-                            //player.setY(player.getY() - 200);
+                            //player.setY(player.getY() - 200); // old code for movement
                             if((charFrameCount==-1)&&(moveUp==0)){
                                 moveUp = 1;
                                 charFrameCount = 0;

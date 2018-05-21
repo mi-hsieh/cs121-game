@@ -42,8 +42,6 @@ public class Obstacle3 extends Obstacle {
         width = 400;
         height = 200;
 
-        //System.out.println("Bitmap width and height: " + width + " " + height);
-
         // initial coordinates
         x = -width;
         y = 0;
@@ -51,13 +49,6 @@ public class Obstacle3 extends Obstacle {
 
         // set visibility to true
         visible = true;
-
-        /*
-        Bitmap createScaledBitmap (Bitmap src,
-        int dstWidth,
-        int dstHeight,
-        boolean filter)
-        */
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {
@@ -92,8 +83,8 @@ public class Obstacle3 extends Obstacle {
         //adding top, left, bottom and right to the rect object
         rect.left = x;
         rect.top = y;
-        rect.right = x + width; //bitmap.getWidth();
-        rect.bottom = y + height; //bitmap.getHeight();
+        rect.right = x + width;
+        rect.bottom = y + height;
     }
 
     // access and getter methods

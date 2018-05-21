@@ -55,8 +55,8 @@ public class Player {
         //System.out.println("Bitmap width and height: " + width + " " + height);
 
         // initial coordinates
-        x = 1600;   //orig 75
-        y = GameView.getScreenHeight()/2 - height;     //orig 50
+        x = 1600;
+        y = GameView.getScreenHeight()/2 - height;
         speed = 1;
 
         /*

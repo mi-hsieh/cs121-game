@@ -44,8 +44,8 @@ public class Tile {
         // x + player width
         x = 1500  + (300);
         // we want the middle tile centered with the player
-        // so the top tile is 2*height above the player
-        y = (GameView.getScreenHeight()/2) - (3*height);    // 75;
+        // so the top tile is 3*height above the player
+        y = (GameView.getScreenHeight()/2) - (3*height);
 
         // get a scaled bitmap (if the bitmap is too big or small)
         try {
@@ -70,8 +70,8 @@ public class Tile {
         //adding top, left, bottom and right to the rect object
         rect.left = x;
         rect.top = y;
-        rect.right = x + width; //bitmap.getWidth();
-        rect.bottom = y + height; //bitmap.getHeight();
+        rect.right = x + width;
+        rect.bottom = y + height;
     }
 
     // access methods
@@ -95,8 +95,6 @@ public class Tile {
     {
         y += shift;
     }
-
-
 
     public int getWidth()
     {
