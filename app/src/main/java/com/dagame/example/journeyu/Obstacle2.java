@@ -40,7 +40,7 @@ public class Obstacle2 extends Obstacle {
         }
 
         width = 200;
-        height = 400;
+        height = 200;
 
         // initial coordinates
         x = -width;

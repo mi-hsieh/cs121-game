@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
+import android.media.MediaPlayer;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -33,6 +34,8 @@ public class GameView extends SurfaceView implements Runnable{
     private Thread gameThread = null;
 
     int time = 17;  // milliseconds
+
+    MediaPlayer medPlay;
 
     // adding player to this class
     private Player player;
@@ -61,6 +64,13 @@ public class GameView extends SurfaceView implements Runnable{
 
     int numObstacles;
 
+    // create new power-up
+    private SideSmash powerup;
+
+    int numPowerUps;
+
+    private boolean canSmash = false;
+
     // the current column - includes empty columns
     int currentCol = 0;
 
@@ -72,6 +82,7 @@ public class GameView extends SurfaceView implements Runnable{
     // movement smoothing for character
     // is equal to 0 or 1 depending on if touch event occurred
     // used in if-statement functionality to trigger the movement animation in update()
+    int move = 0;
     int moveDown = 0;
     int moveUp = 0;
     int charFrameCount = -1;
@@ -89,32 +100,13 @@ public class GameView extends SurfaceView implements Runnable{
 
     public Rect PlayerAniFrame = new Rect(0, 0, 370, 236);
 
-    /*
-         public Rect (int left, int top, int right, int bottom)
-         Create a new rectangle with the specified coordinates. Note: no range
-         checking is performed, so the caller must ensure that left <= right and
-         top <= bottom.
+    // See Note 1 in Project Notes.
 
-         Parameters
-         left : The X coordinate of the left side of the rectangle
-         top : The Y coordinate of the top of the rectangle
-         right : The X coordinate of the right side of the rectangle
-         bottom : The Y coordinate of the bottom of the rectangle
-
-     */
-
-    //private static final String TAG = "Rectangle";
-    // a test rectangle
-    // private Rect rect2 = new Rect(1000, 50, 1300, 350);
+    // private static final String TAG = "GameView";
 
     private boolean isHit = false;
 
-    /* The Canvas class holds the "draw" calls.
-    To draw something, you need 4 basic components: A Bitmap to hold the pixels,
-    a Canvas to host the draw calls (writing into the bitmap),
-    a drawing primitive (e.g. Rect, Path, text, Bitmap),
-    and a paint (to describe the colors and styles for the drawing).
-     */
+    // Note 2
 
     // objects used for drawing
     private Paint paint;
@@ -123,9 +115,17 @@ public class GameView extends SurfaceView implements Runnable{
     when we use Paint and Canvas in a thread*/
     private SurfaceHolder surfaceHolder;
 
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*            GameView             *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
     // class constructor
     public GameView(Context context) {
         super(context);
+
+        // initialize music
+        medPlay = MediaPlayer.create(context, R.raw.rolem_the_white_kitty);
+        medPlay.setLooping(true);
 
         // initialize player object
         player = new Player(context);
@@ -138,6 +138,353 @@ public class GameView extends SurfaceView implements Runnable{
         surfaceHolder = getHolder();
         paint = new Paint();
 
+        itemInitialize(context);
+
+    }
+
+    // Note 3
+
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*               Run               *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    @Override
+    public void run() {
+        while (playing) {
+            // update the frame
+            update();
+
+            // draw the frame
+            draw();
+
+            // control the frame rate
+            control();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*              Update             *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    private void update() {
+
+        playerAnimate();  //update player's animation frame
+
+        // update the player position
+        // player.update();
+
+        obstacleUpdate(); //update obstacle position
+
+        obstacleCollisionCheck(); //check for obstacle collision
+
+        if(move==1){
+            movePlayer();
+        }
+
+        player.update();    // update the player position
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*              Draw               *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    private void draw() {
+        // check if the drawing surface is valid
+        // or we crash
+        if (surfaceHolder.getSurface().isValid())
+        {
+            // lock the canvas ready to draw
+            canvas = surfaceHolder.lockCanvas();
+            // draw a background color for canvas
+            // right now using transparent
+            // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+
+            canvas.drawBitmap(background, 0, 0, paint);
+
+            // draw the tiles
+            for (Tile t : tiles)
+            {
+                canvas.drawBitmap(
+                        t.getBitmap(),
+                        t.getX(),
+                        t.getY(),
+                        paint
+                );
+            }
+
+            // draw the player
+            canvas.drawBitmap(
+                    player.getBitmap(),
+                    PlayerAniFrame,
+                    player.getCollisionRect(),
+                    paint
+            );
+
+            //draw stamina
+            for (Stamina s : stamina)
+            canvas.drawBitmap(
+                    s.getBitmap(),
+                    s.getX(),
+                    s.getY(),
+                    paint
+            );
+
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.argb(255, 26, 128, 182));
+            // draw the corresponding player rectangle
+            canvas.drawRect(player.getCollisionRect(), paint);
+
+            // draw the obstacles
+            for (Obstacle ob : obstacles) {
+                    canvas.drawBitmap(
+                            ob.getBitmap(),
+                            ob.getX(),
+                            ob.getY(),
+                            paint
+                    );
+            }
+
+            // draw the power-up
+            if (powerup != null) {
+                canvas.drawBitmap(
+                        powerup.getBitmap(),
+                        powerup.getX(),
+                        powerup.getY(),
+                        paint
+                );
+            }
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.MAGENTA);
+            Obstacle ob;
+            for (int i = 0; i < numObstacles; i++)
+            {
+                // draw the corresponding obstacle rectangle
+                ob = obstacles.get(i);
+                canvas.drawRect(ob.getCollisionRect(), paint);
+            }
+
+            // draw the corresponding power-up collision rectangle
+            if (powerup != null) {
+                canvas.drawRect(powerup.getCollisionRect(), paint);
+            }
+
+            //draw upButton
+            canvas.drawBitmap(
+                    upButton.getBitmap(),
+                    upButton.getX(),
+                    upButton.getY(),
+                    paint
+            );
+
+            //draw downButton
+            canvas.drawBitmap(
+                    downButton.getBitmap(),
+                    downButton.getX(),
+                    downButton.getY(),
+                    paint
+            );
+
+            // restore paint to default settings for next frame
+            // paint.reset();
+
+            // unlock the canvas = draw everything to the screen
+            surfaceHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*       Pre*** Thread Functions      *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    /* This method will control the frames per seconds drawn.
+    Here we are calling the delay method of Thread.
+    This is currently making our frame rate around 60fps.
+     */
+
+    private void control() {
+        try {
+            // time in milliseconds, used to delay movement
+            gameThread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* if the game is paused we shut
+    the Thread down */
+
+    public void pause() {
+        /* when the game is paused
+           set the variable to false */
+        playing = false;
+        medPlay.pause();
+        try {
+            // Parent thread must wait until the end of gameThread
+            // stopping the thread
+            gameThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void resume() {
+        /* when the game is resumed
+        start the thread again */
+        playing = true;
+        // medPlay.start();
+        gameThread = new Thread(this);
+        gameThread.start();
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*            TouchEvent           *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_UP:
+                if (numStamina > 0) {
+                    if (motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
+                        // don't move if player would be above top platform, also assuming platforms initialized
+                        if (player.getY() > tiles.get(0).getY()) {
+                            if (move == 0) {
+                                if ((charFrameCount == -1) && (moveUp == 0)) {
+                                    moveUp = 1;
+                                    charFrameCount = 0;
+
+                                    numStamina--;
+                                    stamina.remove(stamina.size() - 1);
+                                }
+                                move = 1;
+                            }
+                        }
+                    }
+
+                    if (motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
+                        // don't move if player would be below bottom platform
+                        if (player.getY() < tiles.get(tiles.size() - 1).getY()) {
+                            if (move == 0) {
+                                if ((charFrameCount == -1) && (moveDown == 0)) {
+                                    moveDown = 1;
+                                    charFrameCount = 0;
+
+                                    numStamina--;
+                                    stamina.remove(stamina.size() - 1);
+                                }
+                                move = 1;
+                            }
+                        }
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_DOWN:
+                //When the user releases the screen
+                //do something here
+                break;
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                // when the screen is pressed
+                // do something here
+                break;
+        }
+        return true;
+    }
+
+    // public methods to get phone screen's width and height
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*              Player             *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    public void movePlayer(){
+        if(moveUp==1){
+            charFrameCount++;
+            if(charFrameCount<=5){
+                player.setY((player.getY() - 14));
+            }
+            if(charFrameCount>5 && charFrameCount<=10){
+                player.setY((player.getY() - 18));
+            }
+            if(charFrameCount>10 && charFrameCount<=15){
+                player.setY((player.getY() - 8));
+            }
+            if(charFrameCount==16){
+                charFrameCount=-1;
+                moveUp=0;
+                move=0;
+            }
+        }
+
+        if(moveDown==1){
+            charFrameCount++;
+            if(charFrameCount<=5){
+                player.setY((player.getY() + 14));
+            }
+            if(charFrameCount>5 && charFrameCount<=10){
+                player.setY((player.getY() + 18));
+            }
+            if(charFrameCount>10 && charFrameCount<=15){
+                player.setY((player.getY() + 8));
+            }
+            if(charFrameCount==16){
+                charFrameCount=-1;
+                moveDown=0;
+                move=0;
+            }
+        }
+    }
+
+    public void playerAnimate(){
+        // iterates through frames of sprite sheet
+        if (aniFrameRow == 0) {
+            aniFrameCol++;
+            aniFrameRow++;
+        } else {
+            aniFrameCol++;
+        }
+
+        // check if sprite location is within bounds of sprite sheet
+        if (aniFrameCol > 5) {
+            aniFrameRow++;
+            aniFrameCol = 1;
+            PlayerAniFrame.top += 236;
+            PlayerAniFrame.bottom += 236;
+        }
+        if (aniFrameRow == 9 && aniFrameCol == 5) {
+            aniFrameRow = 1;
+            aniFrameCol = 1;
+        }
+        if (aniFrameRow == 1) {
+            PlayerAniFrame.top = 0;
+            PlayerAniFrame.bottom = 236;
+        }
+        if (aniFrameCol == 1) {
+            PlayerAniFrame.left = 0;
+            PlayerAniFrame.right = 370;
+        }
+        if (aniFrameCol > 1) {
+            PlayerAniFrame.left += 370;
+            PlayerAniFrame.right += 370;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*            Obstacle             *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
+    // includes Obstacle, Power-ups, Tile
+    public void itemInitialize(Context context) {
         numTiles = 5;
 
         numStamina = 10;
@@ -211,76 +558,18 @@ public class GameView extends SurfaceView implements Runnable{
         obstacles.add(ob3);
         obstacles.get(5).setID(6);
 
+        numPowerUps = 1;
+
+        // initialize power-ups
+        powerup = new SideSmash(context);
+        powerup.setY(pos0);
+
         wave = 1;
 
-
     }
 
-    /* A class that implements Runnable can run without subclassing Thread by
-    instantiating a Thread instance and passing itself in as the target. In most cases, the
-    Runnable interface should be used if you are only planning to
-    override the run() method and no other Thread methods.
-     */
-
-    /* When an object implementing interface Runnable is used to create a thread,
-    starting the thread causes the object's run method to be called
-    in that separately executing thread.
-     */
-
-    // Using Runnable, so need to implement run()
-    // From documentation: The class must define a method of no arguments called run.
-    // calls three methods also defined in this class
-    @Override
-    public void run() {
-        while (playing) {
-            // update the frame
-            update();
-
-            // draw the frame
-            draw();
-
-            // control the frame rate
-            control();
-        }
-    }
-
-    private void update() {
-        // update the player position
-        player.update();
-
+    public void obstacleUpdate(){
         obsTimer++;
-
-        // iterates through frames of sprite sheet
-        if (aniFrameRow == 0) {
-            aniFrameCol++;
-            aniFrameRow++;
-        } else {
-            aniFrameCol++;
-        }
-
-        // check if sprite location is within bounds of sprite sheet
-        if (aniFrameCol > 5) {
-            aniFrameRow++;
-            aniFrameCol = 1;
-            PlayerAniFrame.top += 236;
-            PlayerAniFrame.bottom += 236;
-        }
-        if (aniFrameRow == 9 && aniFrameCol == 5) {
-            aniFrameRow = 1;
-            aniFrameCol = 1;
-        }
-        if (aniFrameRow == 1) {
-            PlayerAniFrame.top = 0;
-            PlayerAniFrame.bottom = 236;
-        }
-        if (aniFrameCol == 1) {
-            PlayerAniFrame.left = 0;
-            PlayerAniFrame.right = 370;
-        }
-        if (aniFrameCol > 1) {
-            PlayerAniFrame.left += 370;
-            PlayerAniFrame.right += 370;
-        }
 
         // update obstacle position
         if(obsTimer%35==0){
@@ -295,17 +584,11 @@ public class GameView extends SurfaceView implements Runnable{
                 obsTimer=0;
             }
             obsFrameCount++;
+
+            // move the obstacles
             for (Obstacle ob : obstacles) {
-                /* moved to the obstacle classes, in update
-                if(obsFrameCount<=5){
-                    ob.setX((ob.getX() + 14));
-                }
-                if(obsFrameCount>5 && obsFrameCount<=10){
-                    ob.setX((ob.getX() + 20));
-                }
-                if(obsFrameCount>10 && obsFrameCount<=15){
-                    ob.setX((ob.getX() + 6));
-                }*/
+                /* 3 ifs code moved to the obstacle classes, in update
+                */
 
                 // Note the extra parameter
                 if (currentCol >= 0 && ob.getID() == 1)
@@ -338,23 +621,24 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
 
+            // move the power-up
+            if (currentCol >= 5 && powerup != null)
+            {
+                powerup.update(obsFrameCount);
+            }
+            if (currentCol == 25 && canSmash)
+            {
+                // lose power-up
+                System.out.println("No more smash :(");
+                canSmash = false;
+            }
+
         }
+    }
 
-        // DETECT COLLISIONS HERE
-
-        /* Old code for test rectangle
-        if (Rect.intersects(player.getCollisionRect(), rect2)) {
-
-            // Intersects player bounding rectangle
-            isHit = true;
-
-        }
-        else
-        {
-            isHit = false;
-        }
-        */
-
+    // includes Obstacle and power-ups
+    public void obstacleCollisionCheck(){
+        // obstacle collision
         Obstacle ob;
 
         for (int i = 0; i < obstacles.size(); i++)
@@ -367,13 +651,24 @@ public class GameView extends SurfaceView implements Runnable{
                         numStamina--;
                 }*/
 
-                // test rectangle, if drawn, should flash green briefly
-                // isHit stays true after last object is removed
-                System.out.println("Hit!");
-                isHit = true;
-                System.out.println("Obstacle at index " + i + " collided. Removing.");
-                obstacles.remove(ob);
-                numObstacles--;
+                // can smash cones from the side
+                if (canSmash && ob instanceof Obstacle1 && player.getCollisionRect().top != ob.getCollisionRect().top && player.getCollisionRect().left == ob.getCollisionRect().left)
+                {
+                    System.out.println("Smash!");
+                    System.out.println("Obstacle at index " + i + " collided. Removing.");
+                    obstacles.remove(ob);
+                    numObstacles--;
+                }
+                else {
+
+                    // test rectangle, if drawn, should flash green briefly
+                    // isHit stays true after last object is removed
+                    System.out.println("Hit!");
+                    isHit = true;
+                    System.out.println("Obstacle at index " + i + " collided. Removing.");
+                    obstacles.remove(ob);
+                    numObstacles--;
+                }
             }
             else
             {
@@ -381,266 +676,36 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }
 
+        // power-up collision
+        if (powerup != null && Rect.intersects(player.getCollisionRect(), powerup.getCollisionRect()) )
+        {
+            // canSmash stays true after last object is removed
+            System.out.println("Smash ready!");
+            canSmash = true;
+            System.out.println("Power-up collided. Removing.");
+            powerup = null;
+            numPowerUps--;
+        }
+
         // when obstacles reach the end of the screen, they are destroyed
         // looping backwards because remove() removes object at end of array list
         for (int i=obstacles.size()-1; i>=0; i--)
         {
-            if (obstacles.get(i).getX() >= GameView.getScreenWidth())
+            // assuming tiles are initialized
+            if (obstacles.get(i).getX() > tiles.get(0).getX()-obstacles.get(i).getWidth())
             {
-                //obstacles.get(i).setVisible(false);
-                System.out.println("End of screen reached. Destroying obstacle at index " + i);
+                System.out.println("Tiles reached. Destroying obstacle at index " + i);
                 obstacles.remove(i);
                 numObstacles--;
             }
         }
 
-        if(moveUp==1){
-            charFrameCount++;
-            if(charFrameCount<=5){
-                player.setY((player.getY() - 14));
-            }
-            if(charFrameCount>5 && charFrameCount<=10){
-                player.setY((player.getY() - 18));
-            }
-            if(charFrameCount>10 && charFrameCount<=15){
-                player.setY((player.getY() - 8));
-            }
-            if(charFrameCount==16){
-                charFrameCount=-1;
-                moveUp=0;
-            }
-        }
-
-        if(moveDown==1){
-            charFrameCount++;
-            if(charFrameCount<=5){
-                player.setY((player.getY() + 14));
-            }
-            if(charFrameCount>5 && charFrameCount<=10){
-                player.setY((player.getY() + 18));
-            }
-            if(charFrameCount>10 && charFrameCount<=15){
-                player.setY((player.getY() + 8));
-            }
-            if(charFrameCount==16){
-                charFrameCount=-1;
-                moveDown=0;
-            }
-        }
-
-        player.update();
-    }
-
-    private void draw() {
-        // check if the drawing surface is valid
-        // or we crash
-        if (surfaceHolder.getSurface().isValid())
+        // when power-ups reach the tiles, they are destroyed
+        if (powerup != null && powerup.getX() > tiles.get(0).getX()-powerup.getWidth())
         {
-            // lock the canvas ready to draw
-            canvas = surfaceHolder.lockCanvas();
-            // draw a background color for canvas
-            // right now using transparent
-            // we need PorterDuff.Mode.CLEAR to clear old bitmap drawings (will leave a streak otherwise)
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-
-            // random colors for background
-            //canvas.drawColor(Color.argb(255, 255,20,147));    // hot pink
-            //canvas.drawColor(Color.argb(255, 255,218,185));   // peach
-            //canvas.drawColor(Color.argb(255, 0,191,255));   // deep sky blue
-            //canvas.drawColor(Color.BLACK);    // black
-            //canvas.drawColor(Color.argb(255, 0,0,128));   // navy blue
-
-            canvas.drawBitmap(background, 0, 0, paint);
-
-            // we want the moving rectangle and bitmap to overlap the
-            // static one, so draw static test rect first
-
-            /*
-            // draw test rectangle
-            if (isHit)
-            {
-                paint.setColor(Color.GREEN);
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            }
-            else
-            {
-                paint.setColor(Color.RED);
-                paint.setStyle(Paint.Style.STROKE);
-            }
-            canvas.drawRect(rect2, paint);
-            */
-
-            // draw the tiles
-            for (Tile t : tiles)
-            {
-                canvas.drawBitmap(
-                        t.getBitmap(),
-                        t.getX(),
-                        t.getY(),
-                        paint
-                );
-            }
-
-            // draw the player
-            canvas.drawBitmap(
-                    player.getBitmap(),
-                    PlayerAniFrame,
-                    player.getCollisionRect(),
-                    paint
-            );
-
-            //draw stamina
-            for (Stamina s : stamina)
-            canvas.drawBitmap(
-                    s.getBitmap(),
-                    s.getX(),
-                    s.getY(),
-                    paint
-            );
-
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.argb(255, 26, 128, 182));
-            // draw the corresponding player rectangle
-            canvas.drawRect(player.getCollisionRect(), paint);
-
-            for (Obstacle ob : obstacles) {
-                    canvas.drawBitmap(
-                            ob.getBitmap(),
-                            ob.getX(),
-                            ob.getY(),
-                            paint
-                    );
-            }
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.MAGENTA);
-            Obstacle ob;
-            for (int i = 0; i < numObstacles; i++)
-            {
-                // draw the corresponding obstacle rectangle
-                ob = obstacles.get(i);
-                canvas.drawRect(ob.getCollisionRect(), paint);
-            }
-
-            //draw upButton
-            canvas.drawBitmap(
-                    upButton.getBitmap(),
-                    upButton.getX(),
-                    upButton.getY(),
-                    paint
-            );
-
-            //draw downButton
-            canvas.drawBitmap(
-                    downButton.getBitmap(),
-                    downButton.getX(),
-                    downButton.getY(),
-                    paint
-            );
-
-            // restore paint to default settings for next frame
-            // paint.reset();
-
-            // unlock the canvas = draw everything to the screen
-            surfaceHolder.unlockCanvasAndPost(canvas);
+            System.out.println("Tiles reached. Destroying power-up.");
+            powerup = null;
+            numPowerUps--;
         }
-    }
-
-    /* This method will control the frames per seconds drawn.
-    Here we are calling the delay method of Thread.
-    This is currently making our frame rate around 60fps.
-     */
-
-    private void control() {
-        try {
-            // time in milliseconds, used to delay movement
-            gameThread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /* if the game is paused we shut
-    the Thread down */
-
-    public void pause() {
-        /* when the game is paused
-           set the variable to false */
-        playing = false;
-        try {
-            // Parent thread must wait until the end of gameThread
-            // stopping the thread
-            gameThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void resume() {
-        /* when the game is resumed
-        start the thread again */
-        playing = true;
-        gameThread = new Thread(this);
-        gameThread.start();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_UP:
-                if(motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
-                    // don't move if player would be above top platform, also assuming platforms initialized
-                    if (player.getY() > tiles.get(0).getY()) {
-                        if (numStamina > 0) {
-                            //player.setY(player.getY() - 200); // old code for movement
-                            if((charFrameCount==-1)&&(moveUp==0)){
-                                moveUp = 1;
-                                charFrameCount = 0;
-
-                                numStamina--;
-                                stamina.remove(stamina.size() - 1);
-                            }
-                        }
-                    }
-                }
-
-                if(motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
-                    // don't move if player would be below bottom platform
-                    if (player.getY() < tiles.get(tiles.size()-1).getY()) {
-                        if (numStamina > 0) {
-                            //player.setY(player.getY() + 200);
-                            if((charFrameCount==-1)&&(moveDown==0)){
-                                moveDown = 1;
-                                charFrameCount = 0;
-
-                                numStamina--;
-                                stamina.remove(stamina.size() - 1);
-                            }
-
-                        }
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_DOWN:
-                //When the user releases the screen
-                //do something here
-                break;
-            case MotionEvent.ACTION_BUTTON_PRESS:
-                // when the screen is pressed
-                // do something here
-                break;
-        }
-        return true;
-    }
-
-    // public methods to get phone screen's width and height
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 }
