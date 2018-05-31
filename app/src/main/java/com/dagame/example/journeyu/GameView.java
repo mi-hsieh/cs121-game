@@ -23,6 +23,10 @@ import java.util.ArrayList;
 
 public class GameView extends SurfaceView implements Runnable{
 
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*           Declarations          *///////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+
     // boolean variable to track if the game is playing or not
     // volatile = a field might be modified by multiple threads that are executing at the same time, for scope
     // in case we're using multiple threads, the variable is visible and able to be updated by other threads
@@ -30,39 +34,66 @@ public class GameView extends SurfaceView implements Runnable{
 
     Bitmap background = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.bg1), getScreenWidth(), getScreenHeight(), true);
 
+    //-------------------------------------------------------------------------------------  Game Thread   ---------------------------//
+
     // the game thread
     private Thread gameThread = null;
 
     int time = 17;  // milliseconds
 
+    // media player
     MediaPlayer medPlay;
+
+    //-------------------------------------------------------------------------------------     Player     ----------------------------//
 
     // adding player to this class
     private Player player;
 
-    // upButton
-    private UpButton upButton;
+    // movement smoothing for character
+    // is equal to 0 or 1 depending on if touch event occurred
+    // used in if-statement functionality in update() to iterate through the movement animation
+    int move = 0;
+    int moveDown = 0;
+    int moveUp = 0;
+    int charFrameCount = -1;
+    int numStamina;    // goes down on movement touch event
 
-    // downButton
+    //player animation
+    public Rect PlayerAniFrame = new Rect(0, 0, 370, 236); // sliding window of sprite sheet
+    int aniFrameCol = 0;    // coordinates of sliding window
+    int aniFrameRow = 0;
+
+    //----------------------------------------------------------------------------------      Buttons      ------------------------------//
+    private UpButton upButton;
     private DownButton downButton;
 
-    // array list of platforms, platforms = tiles
+    //----------------------------------------------------------------------------------   Tiles/Stamina   -----------------------------//
     private ArrayList<Tile> tiles = new ArrayList<Tile>();
-
     private ArrayList<Stamina> stamina = new ArrayList<Stamina>();
 
-    // amount to shift tiles by so they line up vertically
+    // amount to shift tiles by so they line up
     int shiftY;
-
     int shiftX;
 
     // number of tiles
     int numTiles;
 
-    // adding obstacles
+    //----------------------------------------------------------------------------------   Obstacles/Power-ups   -----------------------------//
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-
     int numObstacles;
+
+    // the current column - includes empty columns
+    int currentCol = 0;
+
+    // the current "wave" - segment
+    int wave;
+
+    // movement smoothing for obstacle
+    // because not based on onTouch event, we use a a timer that activates movement when obsTimer%35
+    // similar nested if-statement iteration, as for character
+    int obsTimer = 0;
+    int obsFrameCount = 0;
+    int obsFrameStart = 0;
 
     // create new power-up
     private SideSmash powerup;
@@ -71,40 +102,17 @@ public class GameView extends SurfaceView implements Runnable{
 
     private boolean canSmash = false;
 
-    // the current column - includes empty columns
-    int currentCol = 0;
-
-    // the current "wave" - segment
-    int wave;
-
-    int numStamina;
-
-    // movement smoothing for character
-    // is equal to 0 or 1 depending on if touch event occurred
-    // used in if-statement functionality to trigger the movement animation in update()
-    int move = 0;
-    int moveDown = 0;
-    int moveUp = 0;
-    int charFrameCount = -1;
-
-    // animation count for character
-    int aniFrameCol = 0;
-    int aniFrameRow = 0;
-    int aniFrameDelay = 0;
-
-    // movement smoothing for obstacle
-    // because not based on onTouch event, we use a a timer that activates movement when obsTimer%35
-    int obsTimer = 0;
-    int obsFrameCount = 0;
-    int obsFrameStart = 0;
-
-    public Rect PlayerAniFrame = new Rect(0, 0, 370, 236);
+    // testing out pipe functionality
+    int pipeKey = 0;
 
     // See Note 1 in Project Notes.
 
+    // for debugging
     // private static final String TAG = "GameView";
 
     private boolean isHit = false;
+
+    //-----------------------------------------------------------------------------  Setting up drawing construct  --------------//
 
     // Note 2
 
@@ -348,34 +356,36 @@ public class GameView extends SurfaceView implements Runnable{
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_UP:
                 if (numStamina > 0) {
-                    if (motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
-                        // don't move if player would be above top platform, also assuming platforms initialized
-                        if (player.getY() > tiles.get(0).getY()) {
-                            if (move == 0) {
-                                if ((charFrameCount == -1) && (moveUp == 0)) {
-                                    moveUp = 1;
-                                    charFrameCount = 0;
+                    if (pipeKey==0) {
+                        if (motionEvent.getX() > 2100 && motionEvent.getY() < GameView.getScreenHeight() - 1200) {
+                            // don't move if player would be above top platform, also assuming platforms initialized
+                            if (player.getY() > tiles.get(0).getY()) {
+                                if (move == 0) {
+                                    if ((charFrameCount == -1) && (moveUp == 0)) {
+                                        moveUp = 1;
+                                        charFrameCount = 0;
 
-                                    numStamina--;
-                                    stamina.remove(stamina.size() - 1);
+                                        numStamina--;
+                                        stamina.remove(stamina.size() - 1);
+                                    }
+                                    move = 1;
                                 }
-                                move = 1;
                             }
                         }
-                    }
 
-                    if (motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
-                        // don't move if player would be below bottom platform
-                        if (player.getY() < tiles.get(tiles.size() - 1).getY()) {
-                            if (move == 0) {
-                                if ((charFrameCount == -1) && (moveDown == 0)) {
-                                    moveDown = 1;
-                                    charFrameCount = 0;
+                        if (motionEvent.getX() > 2100 && motionEvent.getY() > GameView.getScreenHeight() - 400) {
+                            // don't move if player would be below bottom platform
+                            if (player.getY() < tiles.get(tiles.size() - 1).getY()) {
+                                if (move == 0) {
+                                    if ((charFrameCount == -1) && (moveDown == 0)) {
+                                        moveDown = 1;
+                                        charFrameCount = 0;
 
-                                    numStamina--;
-                                    stamina.remove(stamina.size() - 1);
+                                        numStamina--;
+                                        stamina.remove(stamina.size() - 1);
+                                    }
+                                    move = 1;
                                 }
-                                move = 1;
                             }
                         }
                     }
@@ -408,7 +418,7 @@ public class GameView extends SurfaceView implements Runnable{
     ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
 
     public void movePlayer(){
-        if(moveUp==1){
+        /*if(moveUp==1){
             charFrameCount++;
             if(charFrameCount<=5){
                 player.setY((player.getY() - 14));
@@ -441,6 +451,78 @@ public class GameView extends SurfaceView implements Runnable{
                 charFrameCount=-1;
                 moveDown=0;
                 move=0;
+            }
+        }*/
+
+        if(moveUp==1){
+            charFrameCount++;
+            if(pipeKey==0) {
+                if (charFrameCount <= 5) {
+                    player.setY((player.getY() - 14));
+                }
+                if (charFrameCount > 5 && charFrameCount <= 10) {
+                    player.setY((player.getY() - 18));
+                }
+                if (charFrameCount > 10 && charFrameCount <= 15) {
+                    player.setY((player.getY() - 8));
+                }
+                if (charFrameCount == 16) {
+                    charFrameCount = -1;
+                    moveUp = 0;
+                    move = 0;
+                }
+            } else {
+                if (charFrameCount <= 5) {
+                    player.setY((player.getY() - 28));
+                }
+                if (charFrameCount > 5 && charFrameCount <= 10) {
+                    player.setY((player.getY() - 36));
+                }
+                if (charFrameCount > 10 && charFrameCount <= 15) {
+                    player.setY((player.getY() - 16));
+                }
+                if (charFrameCount == 16) {
+                    charFrameCount = -1;
+                    moveUp = 0;
+                    move = 0;
+                    pipeKey=0;
+                }
+            }
+        }
+
+        if(moveDown==1){
+            charFrameCount++;
+            if(pipeKey==0) {
+                if (charFrameCount <= 5) {
+                    player.setY((player.getY() + 14));
+                }
+                if (charFrameCount > 5 && charFrameCount <= 10) {
+                    player.setY((player.getY() + 18));
+                }
+                if (charFrameCount > 10 && charFrameCount <= 15) {
+                    player.setY((player.getY() + 8));
+                }
+                if (charFrameCount == 16) {
+                    charFrameCount = -1;
+                    moveDown = 0;
+                    move = 0;
+                }
+            } else {
+                if (charFrameCount <= 5) {
+                    player.setY((player.getY() + 28));
+                }
+                if (charFrameCount > 5 && charFrameCount <= 10) {
+                    player.setY((player.getY() + 36));
+                }
+                if (charFrameCount > 10 && charFrameCount <= 15) {
+                    player.setY((player.getY() + 16));
+                }
+                if (charFrameCount == 16) {
+                    charFrameCount = -1;
+                    moveDown = 0;
+                    move = 0;
+                    pipeKey=0;
+                }
             }
         }
     }
@@ -649,6 +731,10 @@ public class GameView extends SurfaceView implements Runnable{
                 /*if (stamina.size() > 0) {
                         stamina.remove(stamina.get(stamina.size() - 1));
                         numStamina--;
+                }
+
+                if(numStamina==0) {
+                    playing = false;
                 }*/
 
                 // can smash cones from the side
@@ -659,9 +745,13 @@ public class GameView extends SurfaceView implements Runnable{
                     obstacles.remove(ob);
                     numObstacles--;
                 }
+                else if(player.getCollisionRect().top != ob.getCollisionRect().top && player.getCollisionRect().left == ob.getCollisionRect().left) {
+                    System.out.println("Pipe.");
+                    System.out.println("Collided with the pipe");
+                    pipeKey=1;
+                }
                 else {
 
-                    // test rectangle, if drawn, should flash green briefly
                     // isHit stays true after last object is removed
                     System.out.println("Hit!");
                     isHit = true;
