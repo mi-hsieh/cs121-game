@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 import java.util.ArrayList;
 
@@ -51,6 +53,7 @@ public class GameView extends SurfaceView implements Runnable{
     // adding player to this class
     private Player player;
 
+
     // movement smoothing for character
     // is equal to 0 or 1 depending on if touch event occurred
     // used in if-statement functionality in update() to iterate through the movement animation
@@ -68,6 +71,11 @@ public class GameView extends SurfaceView implements Runnable{
     //----------------------------------------------------------------------------------      Buttons      ------------------------------//
     private UpButton upButton;
     private DownButton downButton;
+
+    //----------------------------------------------------------------------------------     sound effectt-----------------------------------//
+    //variable used for creating sound effect for the game
+    private SoundPool sounds;
+    private int sndpu;
 
     //----------------------------------------------------------------------------------   Tiles/Stamina   -----------------------------//
     private ArrayList<Tile> tiles = new ArrayList<Tile>();
@@ -831,6 +839,9 @@ public class GameView extends SurfaceView implements Runnable{
                 System.out.println("Power-up collided. Removing.");
                 upPipe = null;
                 numPowerUps--;
+                //sound effect for damage
+                sounds.play(sndpu,1.0f,1.0f,0,0,1.5f);
+
             }
         }
 
