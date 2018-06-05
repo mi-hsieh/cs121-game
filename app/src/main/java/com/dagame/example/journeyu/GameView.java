@@ -1,6 +1,7 @@
 package com.dagame.example.journeyu;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -96,7 +98,9 @@ public class GameView extends SurfaceView implements Runnable{
     int obsFrameStart = 0;
 
     // create new power-up
-    private SideSmash powerup;
+    private SideSmash sideSmash;
+
+    private UpPipe upPipe;
 
     int numPowerUps;
 
@@ -254,16 +258,26 @@ public class GameView extends SurfaceView implements Runnable{
                     );
             }
 
-            // draw the power-up
-            if (powerup != null) {
+            // draw the power-ups
+            if (sideSmash != null) {
                 canvas.drawBitmap(
-                        powerup.getBitmap(),
-                        powerup.getX(),
-                        powerup.getY(),
+                        sideSmash.getBitmap(),
+                        sideSmash.getX(),
+                        sideSmash.getY(),
                         paint
                 );
             }
 
+            if (upPipe != null) {
+                canvas.drawBitmap(
+                        upPipe.getBitmap(),
+                        upPipe.getX(),
+                        upPipe.getY(),
+                        paint
+                );
+            }
+
+            /* collision rectangles for debugging
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.MAGENTA);
             Obstacle ob;
@@ -275,9 +289,13 @@ public class GameView extends SurfaceView implements Runnable{
             }
 
             // draw the corresponding power-up collision rectangle
-            if (powerup != null) {
-                canvas.drawRect(powerup.getCollisionRect(), paint);
+            if (sideSmash != null) {
+                canvas.drawRect(sideSmash.getCollisionRect(), paint);
             }
+
+            if (upPipe != null) {
+                canvas.drawRect(upPipe.getCollisionRect(), paint);
+            } */
 
             //draw upButton
             canvas.drawBitmap(
@@ -454,6 +472,9 @@ public class GameView extends SurfaceView implements Runnable{
             }
         }*/
 
+        //520 - 320, 320 - 120 norm
+        //506 - 134 pipe
+
         if(moveUp==1){
             charFrameCount++;
             if(pipeKey==0) {
@@ -482,6 +503,15 @@ public class GameView extends SurfaceView implements Runnable{
                     player.setY((player.getY() - 16));
                 }
                 if (charFrameCount == 16) {
+
+                    /*The first movement when pipeKey == 0,
+                    player.setY((player.getY() - 14));
+                    will still be called the instant before pipeKey == 1,
+                    that is, the instant before colliding with the pipe, so reset
+                    movement by that same amount */
+
+                    player.setY((player.getY() - 14));
+
                     charFrameCount = -1;
                     moveUp = 0;
                     move = 0;
@@ -525,6 +555,7 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
         }
+
     }
 
     public void playerAnimate(){
@@ -640,11 +671,14 @@ public class GameView extends SurfaceView implements Runnable{
         obstacles.add(ob3);
         obstacles.get(5).setID(6);
 
-        numPowerUps = 1;
+        numPowerUps = 2;
 
         // initialize power-ups
-        powerup = new SideSmash(context);
-        powerup.setY(pos0);
+        sideSmash = new SideSmash(context);
+        sideSmash.setY(pos0);
+
+        upPipe = new UpPipe(context);
+        upPipe.setY(pos2);
 
         wave = 1;
 
@@ -704,15 +738,20 @@ public class GameView extends SurfaceView implements Runnable{
             }
 
             // move the power-up
-            if (currentCol >= 5 && powerup != null)
+            if (currentCol >= 5 && sideSmash != null)
             {
-                powerup.update(obsFrameCount);
+                sideSmash.update(obsFrameCount);
             }
             if (currentCol == 25 && canSmash)
             {
                 // lose power-up
                 System.out.println("No more smash :(");
                 canSmash = false;
+            }
+
+            if (currentCol >= 14 && upPipe != null)
+            {
+                upPipe.update(obsFrameCount);
             }
 
         }
@@ -745,11 +784,9 @@ public class GameView extends SurfaceView implements Runnable{
                     obstacles.remove(ob);
                     numObstacles--;
                 }
-                else if(player.getCollisionRect().top != ob.getCollisionRect().top && player.getCollisionRect().left == ob.getCollisionRect().left) {
-                    System.out.println("Pipe.");
-                    System.out.println("Collided with the pipe");
+                /*else if(player.getCollisionRect().top != ob.getCollisionRect().top && player.getCollisionRect().left == ob.getCollisionRect().left) {
                     pipeKey=1;
-                }
+                }*/
                 else {
 
                     // isHit stays true after last object is removed
@@ -758,6 +795,11 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Obstacle at index " + i + " collided. Removing.");
                     obstacles.remove(ob);
                     numObstacles--;
+                    Intent intent = new Intent(getContext(), GameOver.class);
+                    getContext().startActivity(intent);
+                    // set playing to false, Android should stop thread when required
+                    playing = false;
+                    medPlay.pause();
                 }
             }
             else
@@ -767,14 +809,29 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
         // power-up collision
-        if (powerup != null && Rect.intersects(player.getCollisionRect(), powerup.getCollisionRect()) )
+        if (sideSmash != null && Rect.intersects(player.getCollisionRect(), sideSmash.getCollisionRect()) )
         {
             // canSmash stays true after last object is removed
             System.out.println("Smash ready!");
             canSmash = true;
             System.out.println("Power-up collided. Removing.");
-            powerup = null;
+            sideSmash = null;
             numPowerUps--;
+        }
+
+        // power-up collision
+        if (upPipe != null && Rect.intersects(player.getCollisionRect(), upPipe.getCollisionRect()) )
+        {
+            if(player.getCollisionRect().top != upPipe.getCollisionRect().top && player.getCollisionRect().left == upPipe.getCollisionRect().left) {
+                pipeKey=1;
+                System.out.println("Pipe. Going up.");
+            }
+            else {
+                System.out.println("Failed to get pipe or pipe out of range.");
+                System.out.println("Power-up collided. Removing.");
+                upPipe = null;
+                numPowerUps--;
+            }
         }
 
         // when obstacles reach the end of the screen, they are destroyed
@@ -791,10 +848,17 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
         // when power-ups reach the tiles, they are destroyed
-        if (powerup != null && powerup.getX() > tiles.get(0).getX()-powerup.getWidth())
+        if (sideSmash != null && sideSmash.getX() > tiles.get(0).getX()-sideSmash.getWidth())
         {
             System.out.println("Tiles reached. Destroying power-up.");
-            powerup = null;
+            sideSmash = null;
+            numPowerUps--;
+        }
+
+        if (upPipe != null && upPipe.getX() > tiles.get(0).getX()-upPipe.getWidth())
+        {
+            System.out.println("Tiles reached. Destroying power-up.");
+            upPipe = null;
             numPowerUps--;
         }
     }

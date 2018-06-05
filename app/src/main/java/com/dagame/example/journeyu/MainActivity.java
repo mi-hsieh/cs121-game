@@ -2,6 +2,7 @@ package com.dagame.example.journeyu;
 
 //import android.graphics.Rect;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,9 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     //private static final String TAG = "Rectangle";
 
-    int stamina = 5;
-    int life = 1;
-    int score = 0;
+    int replaying = 0;
 
     // declare GameView (a view = base class for widgets and UI, handles drawing and events)
     private GameView gameView;
@@ -59,8 +58,36 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume()
     {
-        super.onResume();
-        gameView.resume();
+
+        /* int getIntExtra (String name,
+                int defaultValue)
+
+        Parameters
+
+        name - The name of the desired item.
+
+        defaultValue - the value to be returned if no value of the desired type is stored with the given name.
+
+        Returns
+
+        the value of an item that previously added with putExtra() or the default value if none was found. */
+
+        Intent intent = getIntent();
+        replaying = intent.getIntExtra("intVariableName", 0);
+        //System.out.println("Replaying is " + replaying);
+
+        // replay = 0 false, replay = 1 true
+        // by default replaying should be false
+        if (replaying == 0) {
+            super.onResume();
+            gameView.resume();
+        }
+        else
+        {
+            gameView = new GameView(this);
+            setContentView(gameView);
+            replaying = 0;
+        }
     }
 
 }

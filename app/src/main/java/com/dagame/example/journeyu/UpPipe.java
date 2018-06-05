@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 
-public class SideSmash {
+public class UpPipe {
     //Bitmap to get power-up from image
     private Bitmap bitmap;
 
@@ -30,11 +30,11 @@ public class SideSmash {
     private int ID = 0;
 
     //constructor
-    public SideSmash(Context context) {
+    public UpPipe(Context context) {
 
         // Getting bitmap from drawable resource
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.side_smash);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pipe_powerup_10);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");

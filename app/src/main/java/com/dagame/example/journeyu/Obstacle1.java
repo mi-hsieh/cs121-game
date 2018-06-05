@@ -68,7 +68,8 @@ public class Obstacle1 extends Obstacle {
         }
 
         // Rectangle object for collision
-        rect = new Rect(x, y, x + width, y + height);
+        /*rect = new Rect(x, y, x + width, y + height);*/
+        rect = new Rect(x, y + 50, x + width, y + (height - 50));
 
     }
 
@@ -89,9 +90,9 @@ public class Obstacle1 extends Obstacle {
 
         //adding top, left, bottom and right to the rect object
         rect.left = x;
-        rect.top = y;
-        rect.right = x + width; //bitmap.getWidth();
-        rect.bottom = y + height; //bitmap.getHeight();
+        rect.top = y + 50;
+        rect.right = x + width;
+        rect.bottom = y + (height - 50);
     }
 
     // access and getter methods
