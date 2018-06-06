@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 
 public class SideSmash {
@@ -21,6 +23,10 @@ public class SideSmash {
     private int x;
     private int y;
 
+    //sound effect
+    private SoundPool sounds;
+    private int snddama;
+
     // whether the obstacle is drawable or not, default false
     private boolean visible;
 
@@ -35,6 +41,9 @@ public class SideSmash {
         // Getting bitmap from drawable resource
         try {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.side_smash);
+            sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
+            snddama = sounds.load(context,R.raw.damage,1);
+
         } catch (Exception e)
         {
             System.out.println("Could not get resource");

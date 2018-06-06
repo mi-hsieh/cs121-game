@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
 
 /**
  * Created by Michael on 4/24/2018.
@@ -24,6 +26,10 @@ public class UpButton {
     //coordinates
     private int x;
     private int y;
+
+    //sound effect
+    private SoundPool sounds;
+    private int snddama;
 
     //constructor
     public UpButton(Context context) {
