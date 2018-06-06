@@ -19,13 +19,20 @@ public class GameOver extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         // replay = 0 false, replay = 1 true
         int replaying = 1;
-        intent.putExtra("replaying", replaying);
-        //startActivity(intent);
+        // intent.putExtra("replaying", replaying);
+        // startActivity(intent);
 
         //pop the activity off the stack
-        Intent i = new Intent(GameOver.this, MainActivity.class);
+        /*Intent i = new Intent(GameOver.this, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
+        startActivity(i);*/
+
+        intent = new Intent(GameOver.this, MainActivity.class);
+        intent.putExtra("replaying", replaying);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+
+        System.out.println("Replaying intent sent is " + replaying);
 
         /*Toast.makeText(GameOver.this, "Replaying.",
                 Toast.LENGTH_LONG).show();*/

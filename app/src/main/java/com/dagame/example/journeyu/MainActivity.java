@@ -73,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
         the value of an item that previously added with putExtra() or the default value if none was found. */
 
         Intent intent = getIntent();
-        replaying = intent.getIntExtra("intVariableName", 0);
-        //System.out.println("Replaying is " + replaying);
+        replaying = intent.getIntExtra("replaying", 0);
+        System.out.println("Replaying is " + replaying);
 
         // replay = 0 false, replay = 1 true
         // by default replaying should be false
@@ -84,9 +84,16 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            gameView = new GameView(this);
+            /*gameView = new GameView(this);
+            System.out.println("Started new game");
             setContentView(gameView);
-            replaying = 0;
+            System.out.println("set new game view");
+            replaying = 0;*/
+
+            // this works, for some reason
+            // same code as above
+            super.onResume();
+            gameView.resume();
         }
     }
 

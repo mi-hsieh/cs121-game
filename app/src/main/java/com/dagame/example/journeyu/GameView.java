@@ -360,7 +360,7 @@ public class GameView extends SurfaceView implements Runnable{
         /* when the game is resumed
         start the thread again */
         playing = true;
-        // medPlay.start();
+        medPlay.start();
         gameThread = new Thread(this);
         gameThread.start();
     }
@@ -745,7 +745,7 @@ public class GameView extends SurfaceView implements Runnable{
             if (currentCol == 25 && canSmash)
             {
                 // lose power-up
-                System.out.println("No more smash :(");
+                System.out.println("No more smash");
                 canSmash = false;
             }
 
