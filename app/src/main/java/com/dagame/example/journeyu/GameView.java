@@ -11,7 +11,10 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -46,7 +49,16 @@ public class GameView extends SurfaceView implements Runnable{
     int time = 17;  // milliseconds
 
     // media player
+    //variable used for creating sound effect for the game
+    SoundPool soundpool;
+    SoundPool.Builder soundPoolBuilder;
+
+    AudioAttributes attributes;
+    AudioAttributes.Builder attributesBuilder;
+    int snddama;
     MediaPlayer medPlay;
+    MediaPlayer snddamage;
+    MediaPlayer sndpowerup;
 
     //-------------------------------------------------------------------------------------     Player     ----------------------------//
 
@@ -73,8 +85,7 @@ public class GameView extends SurfaceView implements Runnable{
     private DownButton downButton;
 
     //----------------------------------------------------------------------------------     sound effectt-----------------------------------//
-    //variable used for creating sound effect for the game
-    private SoundPool sounds;
+
     private int sndpu;
 
     //----------------------------------------------------------------------------------   Tiles/Stamina   -----------------------------//
@@ -154,6 +165,7 @@ public class GameView extends SurfaceView implements Runnable{
 
         downButton = new DownButton(context);
 
+
         // initialize drawing objects
         surfaceHolder = getHolder();
         paint = new Paint();
@@ -168,6 +180,7 @@ public class GameView extends SurfaceView implements Runnable{
     ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
     ////////////////////////////////////////////////////////////////////*               Run               *///////////////////////////////////////
     ////////////////////////////////////////////////////////////////////*                                 *///////////////////////////////////////
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void run() {
         while (playing) {
@@ -392,6 +405,10 @@ public class GameView extends SurfaceView implements Runnable{
                                         charFrameCount = 0;
 
                                         numStamina--;
+                                        snddamage = MediaPlayer.create(getContext(), R.raw.damage);
+                                        snddamage.setLooping(false);
+                                        snddamage.start();
+
                                         stamina.remove(stamina.size() - 1);
                                     }
                                     move = 1;
@@ -408,6 +425,9 @@ public class GameView extends SurfaceView implements Runnable{
                                         charFrameCount = 0;
 
                                         numStamina--;
+                                        snddamage = MediaPlayer.create(getContext(), R.raw.damage);
+                                        snddamage.setLooping(false);
+                                        snddamage.start();
                                         stamina.remove(stamina.size() - 1);
                                     }
                                     move = 1;
@@ -825,6 +845,7 @@ public class GameView extends SurfaceView implements Runnable{
             System.out.println("Power-up collided. Removing.");
             sideSmash = null;
             numPowerUps--;
+
         }
 
         // power-up collision
@@ -832,6 +853,9 @@ public class GameView extends SurfaceView implements Runnable{
         {
             if(player.getCollisionRect().top != upPipe.getCollisionRect().top && player.getCollisionRect().left == upPipe.getCollisionRect().left) {
                 pipeKey=1;
+                sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
+                sndpowerup.setLooping(false);
+                sndpowerup.start();
                 System.out.println("Pipe. Going up.");
             }
             else {
@@ -839,8 +863,9 @@ public class GameView extends SurfaceView implements Runnable{
                 System.out.println("Power-up collided. Removing.");
                 upPipe = null;
                 numPowerUps--;
-                //sound effect for damage
-                sounds.play(sndpu,1.0f,1.0f,0,0,1.5f);
+
+
+
 
             }
         }

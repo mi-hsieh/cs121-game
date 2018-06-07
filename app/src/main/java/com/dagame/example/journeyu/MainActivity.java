@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         // initialize the GameView object
         // our context is this activity (main activity)
         gameView = new GameView(this);
+
         // add the view to our content view
         setContentView(gameView);
 
