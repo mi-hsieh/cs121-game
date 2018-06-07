@@ -19,7 +19,7 @@ public class GameOver extends AppCompatActivity {
         setContentView(R.layout.activity_game_over);
 
         sndgo = MediaPlayer.create(GameOver.this, R.raw.gameover);
-        sndgo.setLooping(true);
+        sndgo.setLooping(false);
         sndgo.start();
 
     }

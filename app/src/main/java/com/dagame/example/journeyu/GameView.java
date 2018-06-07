@@ -48,17 +48,14 @@ public class GameView extends SurfaceView implements Runnable{
 
     int time = 17;  // milliseconds
 
-    // media player
     //variable used for creating sound effect for the game
-    SoundPool soundpool;
-    SoundPool.Builder soundPoolBuilder;
 
-    AudioAttributes attributes;
-    AudioAttributes.Builder attributesBuilder;
-    int snddama;
     MediaPlayer medPlay;
     MediaPlayer snddamage;
     MediaPlayer sndpowerup;
+    MediaPlayer sndsmash;
+    MediaPlayer snddie;
+
 
     //-------------------------------------------------------------------------------------     Player     ----------------------------//
 
@@ -823,6 +820,10 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Obstacle at index " + i + " collided. Removing.");
                     obstacles.remove(ob);
                     numObstacles--;
+                    snddie = MediaPlayer.create(getContext(), R.raw.die);
+                    snddie.setLooping(false);
+                    snddie.start();
+
                     Intent intent = new Intent(getContext(), GameOver.class);
                     getContext().startActivity(intent);
                     // set playing to false, Android should stop thread when required
@@ -843,6 +844,9 @@ public class GameView extends SurfaceView implements Runnable{
             System.out.println("Smash ready!");
             canSmash = true;
             System.out.println("Power-up collided. Removing.");
+            sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
+            sndsmash.setLooping(false);
+            sndsmash.start();
             sideSmash = null;
             numPowerUps--;
 
