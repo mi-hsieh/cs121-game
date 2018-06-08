@@ -49,10 +49,6 @@ public class GameView extends SurfaceView implements Runnable{
 
     // media player
     MediaPlayer medPlay;
-    MediaPlayer snddamage;
-    MediaPlayer sndpowerup;
-    MediaPlayer sndsmash;
-    MediaPlayer snddie;
 
     // media players used for creating sound effects for the game
     // right now, these are initialized when the sound actually occurs
@@ -832,9 +828,6 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Obstacle at index " + i + " collided. Removing.");
                     obstacles.remove(ob);
                     numObstacles--;
-                    snddie = MediaPlayer.create(getContext(), R.raw.die);
-                    snddie.setLooping(false);
-                    snddie.start();
 
                     Intent intent = new Intent(getContext(), GameOver.class);
                     getContext().startActivity(intent);
