@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("set new game view");
             replaying = 0;*/
 
-            // this works, for some reason
+            // this works for some reason
             // same code as above
             super.onResume();
             gameView.resume();

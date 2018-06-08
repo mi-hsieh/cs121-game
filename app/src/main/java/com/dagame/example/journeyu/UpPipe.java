@@ -40,7 +40,7 @@ public class UpPipe {
 
         // Getting bitmap from drawable resource
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pipe_powerup_10);
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pipe_powerup_up_01_nooutlines);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");

@@ -10,7 +10,7 @@ import android.media.MediaPlayer;
 
 public class GameOver extends AppCompatActivity {
 
-    //add gameover music
+    //add game over music
     MediaPlayer sndgo;
 
     @Override
@@ -19,7 +19,7 @@ public class GameOver extends AppCompatActivity {
         setContentView(R.layout.activity_game_over);
 
         sndgo = MediaPlayer.create(GameOver.this, R.raw.gameover);
-        sndgo.setLooping(true);
+        sndgo.setLooping(false);
         sndgo.start();
 
     }
@@ -31,9 +31,9 @@ public class GameOver extends AppCompatActivity {
         finish();
 
     }
-    /* Called when the user taps the Send button */
+    /* Called when the user taps the Replay button */
     public void onReplayClicked(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
+        // Intent intent = new Intent(this, MainActivity.class);
         // replay = 0 false, replay = 1 true
         int replaying = 1;
         // intent.putExtra("replaying", replaying);
@@ -44,7 +44,7 @@ public class GameOver extends AppCompatActivity {
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);*/
 
-        intent = new Intent(GameOver.this, MainActivity.class);
+        Intent intent = new Intent(GameOver.this, MainActivity.class);
         intent.putExtra("replaying", replaying);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
