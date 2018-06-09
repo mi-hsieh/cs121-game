@@ -21,8 +21,12 @@ public class Player {
     private int width;
     private int height;
 
-    //Rectangle hit box for the character
+    //Rectangle animation box for the character
     private Rect rect;
+
+    /*added a new rectangle for smaller collision area*/
+    //Rectangle hit box for the character
+    private Rect collisonRect;
 
     //coordinates
     private int x;
@@ -76,8 +80,11 @@ public class Player {
             e.printStackTrace();
         }*/
 
-        // Rectangle object for collision
+        // Rectangle object for animation
         rect = new Rect(x, y, x + 314, y + height);
+
+        // Rectangle object for collision
+        collisonRect = new Rect(x, y, x + width, y + height);
 
     }
 
@@ -91,6 +98,12 @@ public class Player {
         rect.top = y;
         rect.right = x + 314; //bitmap.getWidth();
         rect.bottom = y + height; //bitmap.getHeight();
+
+        //adding top, left, bottom and right to the collision rect object
+        collisonRect.left = x;
+        collisonRect.top = y;
+        collisonRect.right = x + width;
+        collisonRect.bottom = y + height;
     }
 
     // access methods
@@ -115,9 +128,11 @@ public class Player {
         return speed;
     }
 
-    public Rect getCollisionRect() {
+    public Rect getAnimationRect() {
         return rect;
     }
+
+    public Rect getCollisionRect() { return collisonRect; }
 
     public int getWidth()
     {

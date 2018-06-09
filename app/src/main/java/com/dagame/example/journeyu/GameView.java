@@ -51,7 +51,6 @@ public class GameView extends SurfaceView implements Runnable{
     MediaPlayer medPlay;
 
     // media players used for creating sound effects for the game
-    // right now, these are initialized when the sound actually occurs
     MediaPlayer snddamage;
     MediaPlayer sndpowerup;
     MediaPlayer sndsmash;
@@ -119,6 +118,9 @@ public class GameView extends SurfaceView implements Runnable{
 
     private boolean canSmash = false;
 
+    // boolean for sound effect - only want it to play once
+    private boolean firstHitPipe = true;
+
     // testing out pipe functionality
     int pipeKey = 0;
 
@@ -151,6 +153,19 @@ public class GameView extends SurfaceView implements Runnable{
         // initialize music
         medPlay = MediaPlayer.create(context, R.raw.rolem_the_white_kitty);
         medPlay.setLooping(true);
+
+        // initialize sound effects
+        snddamage = MediaPlayer.create(getContext(), R.raw.damage);
+        snddamage.setLooping(false);
+
+        sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
+        sndsmash.setLooping(false);
+
+        snddie = MediaPlayer.create(getContext(), R.raw.die);
+        snddie.setLooping(false);
+
+        sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
+        sndpowerup.setLooping(false);
 
         // initialize player object
         player = new Player(context);
@@ -244,7 +259,7 @@ public class GameView extends SurfaceView implements Runnable{
             canvas.drawBitmap(
                     player.getBitmap(),
                     PlayerAniFrame,
-                    player.getCollisionRect(),
+                    player.getAnimationRect(),
                     paint
             );
 
@@ -260,8 +275,9 @@ public class GameView extends SurfaceView implements Runnable{
 
             paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.argb(255, 26, 128, 182));
+
             // draw the corresponding player rectangle
-            canvas.drawRect(player.getCollisionRect(), paint);
+            /* canvas.drawRect(player.getCollisionRect(), paint); */
 
             // draw the obstacles
             for (Obstacle ob : obstacles) {
@@ -399,8 +415,8 @@ public class GameView extends SurfaceView implements Runnable{
                                         charFrameCount = 0;
 
                                         numStamina--;
-                                        snddamage = MediaPlayer.create(getContext(), R.raw.damage);
-                                        snddamage.setLooping(false);
+                                        /*snddamage = MediaPlayer.create(getContext(), R.raw.damage);
+                                        snddamage.setLooping(false);*/
                                         snddamage.start();
 
                                         stamina.remove(stamina.size() - 1);
@@ -419,8 +435,8 @@ public class GameView extends SurfaceView implements Runnable{
                                         charFrameCount = 0;
 
                                         numStamina--;
-                                        snddamage = MediaPlayer.create(getContext(), R.raw.damage);
-                                        snddamage.setLooping(false);
+                                        /*snddamage = MediaPlayer.create(getContext(), R.raw.damage);
+                                        snddamage.setLooping(false);*/
                                         snddamage.start();
 
                                         stamina.remove(stamina.size() - 1);
@@ -805,8 +821,8 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Smash!");
                     System.out.println("Obstacle at index " + i + " collided. Removing.");
 
-                    sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
-                    sndsmash.setLooping(false);
+                    /*sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
+                    sndsmash.setLooping(false);*/
                     sndsmash.start();
 
                     obstacles.remove(ob);
@@ -821,8 +837,8 @@ public class GameView extends SurfaceView implements Runnable{
                     System.out.println("Hit!");
                     isHit = true;
 
-                    snddie = MediaPlayer.create(getContext(), R.raw.die);
-                    snddie.setLooping(false);
+                    /*snddie = MediaPlayer.create(getContext(), R.raw.die);
+                    snddie.setLooping(false);*/
                     snddie.start();
 
                     System.out.println("Obstacle at index " + i + " collided. Removing.");
@@ -850,8 +866,8 @@ public class GameView extends SurfaceView implements Runnable{
             canSmash = true;
             System.out.println("Power-up collided. Removing.");
 
-            sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
-            sndpowerup.setLooping(false);
+            /*sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
+            sndpowerup.setLooping(false);*/
             sndpowerup.start();
 
             sideSmash = null;
@@ -864,9 +880,12 @@ public class GameView extends SurfaceView implements Runnable{
         {
             if(player.getCollisionRect().top != upPipe.getCollisionRect().top && player.getCollisionRect().left == upPipe.getCollisionRect().left) {
                 pipeKey=1;
-                sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
-                sndpowerup.setLooping(false);
-                sndpowerup.start();
+                /*sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
+                sndpowerup.setLooping(false);*/
+                if (firstHitPipe) {
+                    sndpowerup.start();
+                    firstHitPipe = false;
+                }
                 System.out.println("Pipe. Going up.");
             }
             else {
@@ -882,26 +901,28 @@ public class GameView extends SurfaceView implements Runnable{
         // looping backwards because remove() removes object at end of array list
         for (int i=obstacles.size()-1; i>=0; i--)
         {
-            // assuming tiles are initialized
-            if (obstacles.get(i).getX() > tiles.get(0).getX()-obstacles.get(i).getWidth())
+            // tiles.get(0).getX()-obstacles.get(i).getWidth()
+            if (obstacles.get(i).getX() >= GameView.getScreenWidth())
             {
-                System.out.println("Tiles reached. Destroying obstacle at index " + i);
+                System.out.println("End of screen reached. Destroying obstacle at index " + i);
                 obstacles.remove(i);
                 numObstacles--;
             }
         }
 
-        // when power-ups reach the tiles, they are destroyed
-        if (sideSmash != null && sideSmash.getX() > tiles.get(0).getX()-sideSmash.getWidth())
+        // when power-ups reach end of screen, they are destroyed
+        // tiles.get(0).getX()-sideSmash.getWidth()
+        if (sideSmash != null && sideSmash.getX() >=  GameView.getScreenWidth())
         {
-            System.out.println("Tiles reached. Destroying power-up.");
+            System.out.println("End of screen reached. Destroying power-up.");
             sideSmash = null;
             numPowerUps--;
         }
 
-        if (upPipe != null && upPipe.getX() > tiles.get(0).getX()-upPipe.getWidth())
+        // > tiles.get(0).getX()-upPipe.getWidth()
+        if (upPipe != null && upPipe.getX() >= GameView.getScreenWidth())
         {
-            System.out.println("Tiles reached. Destroying power-up.");
+            System.out.println("End of screen reached. Destroying power-up.");
             upPipe = null;
             numPowerUps--;
         }
