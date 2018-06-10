@@ -4,11 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.media.AudioManager;
-import android.media.SoundPool;
 
 
-public class SideSmash extends PowerUp {
+public class Coin extends PowerUp{
     //Bitmap to get power-up from image
     private Bitmap bitmap;
 
@@ -23,10 +21,6 @@ public class SideSmash extends PowerUp {
     private int x;
     private int y;
 
-    //sound effect
-    private SoundPool sounds;
-    private int snddama;
-
     // whether the obstacle is drawable or not, default false
     private boolean visible;
 
@@ -36,14 +30,11 @@ public class SideSmash extends PowerUp {
     private int ID = 0;
 
     //constructor
-    public SideSmash(Context context) {
+    public Coin(Context context) {
 
         // Getting bitmap from drawable resource
         try {
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.side_smash);
-            sounds = new SoundPool(10,AudioManager.STREAM_MUSIC,0);
-            snddama = sounds.load(context,R.raw.damage,1);
-
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.coin_tr);
         } catch (Exception e)
         {
             System.out.println("Could not get resource");
@@ -154,6 +145,7 @@ public class SideSmash extends PowerUp {
     }
 
 }
+
 
 
 

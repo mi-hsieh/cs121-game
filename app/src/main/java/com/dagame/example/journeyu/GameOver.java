@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.TextView;
 import android.media.MediaPlayer;
 
 
@@ -22,6 +22,12 @@ public class GameOver extends AppCompatActivity {
         sndgo.setLooping(false);
         sndgo.start();
 
+        int score = getIntent().getIntExtra("score", 0);
+        String scoreString = Integer.toString(score);
+
+        TextView scoreDisplay = findViewById(R.id.scoreTextView);
+        scoreDisplay.setText(scoreString);
+
     }
 
     @Override
@@ -31,6 +37,7 @@ public class GameOver extends AppCompatActivity {
         finish();
 
     }
+
     /* Called when the user taps the Replay button */
     public void onReplayClicked(View view) {
         // Intent intent = new Intent(this, MainActivity.class);

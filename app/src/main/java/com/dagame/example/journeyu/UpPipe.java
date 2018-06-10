@@ -4,11 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.media.AudioManager;
-import android.media.SoundPool;
 
 
-public class UpPipe {
+public class UpPipe extends PowerUp {
     //Bitmap to get power-up from image
     private Bitmap bitmap;
 
@@ -22,10 +20,6 @@ public class UpPipe {
     //coordinates
     private int x;
     private int y;
-
-    //sound effect
-    private SoundPool sounds;
-    private int snddama;
 
     // whether the obstacle is drawable or not, default false
     private boolean visible;

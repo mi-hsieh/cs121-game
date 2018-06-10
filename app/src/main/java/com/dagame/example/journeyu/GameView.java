@@ -11,7 +11,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 //import android.util.Log;
-import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -92,6 +91,9 @@ public class GameView extends SurfaceView implements Runnable{
     // number of tiles
     int numTiles;
 
+    //----------------------------------------------------------------------------------      Score      ------------------------------//
+    int score = 0;
+
     //----------------------------------------------------------------------------------   Obstacles/Power-ups   -----------------------------//
     private ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
     int numObstacles;
@@ -109,11 +111,12 @@ public class GameView extends SurfaceView implements Runnable{
     int obsFrameCount = 0;
     int obsFrameStart = 0;
 
-    // create new power-up
-    private SideSmash sideSmash;
+    // create new power-up array
 
-    private UpPipe upPipe;
+    /*private SideSmash sideSmash;
+    private UpPipe upPipe;*/
 
+    private ArrayList<PowerUp> powerUps = new ArrayList<PowerUp>();
     int numPowerUps;
 
     private boolean canSmash = false;
@@ -158,10 +161,13 @@ public class GameView extends SurfaceView implements Runnable{
         snddamage = MediaPlayer.create(getContext(), R.raw.damage);
         snddamage.setLooping(false);
 
-        sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
+        /* switched smash and die effects b/c sounded more appropriate */
+        //sndsmash = MediaPlayer.create(getContext(), R.raw.smash);
+        sndsmash = MediaPlayer.create(getContext(), R.raw.die);
         sndsmash.setLooping(false);
 
-        snddie = MediaPlayer.create(getContext(), R.raw.die);
+        //snddie = MediaPlayer.create(getContext(), R.raw.die);
+        snddie = MediaPlayer.create(getContext(), R.raw.smash);
         snddie.setLooping(false);
 
         sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
@@ -290,7 +296,7 @@ public class GameView extends SurfaceView implements Runnable{
             }
 
             // draw the power-ups
-            if (sideSmash != null) {
+            /*if (sideSmash != null) {
                 canvas.drawBitmap(
                         sideSmash.getBitmap(),
                         sideSmash.getX(),
@@ -304,6 +310,15 @@ public class GameView extends SurfaceView implements Runnable{
                         upPipe.getBitmap(),
                         upPipe.getX(),
                         upPipe.getY(),
+                        paint
+                );
+            }*/
+            for (PowerUp p : powerUps)
+            {
+                canvas.drawBitmap(
+                        p.getBitmap(),
+                        p.getX(),
+                        p.getY(),
                         paint
                 );
             }
@@ -710,14 +725,24 @@ public class GameView extends SurfaceView implements Runnable{
         obstacles.add(ob3);
         obstacles.get(5).setID(6);
 
-        numPowerUps = 2;
+        numPowerUps = 3;
 
         // initialize power-ups
-        sideSmash = new SideSmash(context);
+        // IDs start from 1
+        SideSmash sideSmash = new SideSmash(context);
         sideSmash.setY(pos0);
+        powerUps.add(sideSmash);
+        powerUps.get(0).setID(1);
 
-        upPipe = new UpPipe(context);
+        Coin coin = new Coin(context);
+        coin.setY(pos1);
+        powerUps.add(coin);
+        powerUps.get(1).setID(2);
+
+        UpPipe upPipe = new UpPipe(context);
         upPipe.setY(pos2);
+        powerUps.add(upPipe);
+        powerUps.get(2).setID(3);
 
         wave = 1;
 
@@ -733,6 +758,7 @@ public class GameView extends SurfaceView implements Runnable{
 
             // we've reached the next column
             currentCol++;
+            score += 100;
         }
         if(obsFrameStart==1){
             if(obsTimer==25){
@@ -776,8 +802,8 @@ public class GameView extends SurfaceView implements Runnable{
                 }
             }
 
-            // move the power-up
-            if (currentCol >= 5 && sideSmash != null)
+            // move the power-ups
+            /*if (currentCol >= 5 && sideSmash != null)
             {
                 sideSmash.update(obsFrameCount);
             }
@@ -791,6 +817,29 @@ public class GameView extends SurfaceView implements Runnable{
             if (currentCol >= 14 && upPipe != null)
             {
                 upPipe.update(obsFrameCount);
+            }*/
+            for (PowerUp p : powerUps)
+            {
+                if (currentCol >= 5 && p.getID() == 1)
+                {
+                    p.update(obsFrameCount);
+                }
+                if (currentCol == 25 && canSmash)
+                {
+                    // lose power-up
+                    System.out.println("No more smash");
+                    canSmash = false;
+                }
+
+                if (currentCol >= 6 && p.getID() == 2)
+                {
+                    p.update(obsFrameCount);
+                }
+
+                if (currentCol >= 14 && p.getID() == 3)
+                {
+                    p.update(obsFrameCount);
+                }
             }
 
         }
@@ -825,6 +874,8 @@ public class GameView extends SurfaceView implements Runnable{
                     sndsmash.setLooping(false);*/
                     sndsmash.start();
 
+                    score += 50;
+
                     obstacles.remove(ob);
                     numObstacles--;
                 }
@@ -846,6 +897,7 @@ public class GameView extends SurfaceView implements Runnable{
                     numObstacles--;
 
                     Intent intent = new Intent(getContext(), GameOver.class);
+                    intent.putExtra("score", score);
                     getContext().startActivity(intent);
                     // set playing to false, Android should stop thread when required
                     playing = false;
@@ -859,15 +911,13 @@ public class GameView extends SurfaceView implements Runnable{
         }
 
         // power-up collision
-        if (sideSmash != null && Rect.intersects(player.getCollisionRect(), sideSmash.getCollisionRect()) )
+        /*if (sideSmash != null && Rect.intersects(player.getCollisionRect(), sideSmash.getCollisionRect()) )
         {
             // canSmash stays true after last object is removed
             System.out.println("Smash ready!");
             canSmash = true;
             System.out.println("Power-up collided. Removing.");
 
-            /*sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
-            sndpowerup.setLooping(false);*/
             sndpowerup.start();
 
             sideSmash = null;
@@ -875,13 +925,11 @@ public class GameView extends SurfaceView implements Runnable{
 
         }
 
-        // power-up collision
         if (upPipe != null && Rect.intersects(player.getCollisionRect(), upPipe.getCollisionRect()) )
         {
             if(player.getCollisionRect().top != upPipe.getCollisionRect().top && player.getCollisionRect().left == upPipe.getCollisionRect().left) {
                 pipeKey=1;
-                /*sndpowerup = MediaPlayer.create(getContext(), R.raw.powerup);
-                sndpowerup.setLooping(false);*/
+
                 if (firstHitPipe) {
                     sndpowerup.start();
                     firstHitPipe = false;
@@ -894,6 +942,59 @@ public class GameView extends SurfaceView implements Runnable{
                 upPipe = null;
                 numPowerUps--;
 
+            }
+        }*/
+
+        PowerUp p;
+        for (int i = 0; i < powerUps.size(); i++)
+        {
+            p = powerUps.get(i);
+
+            if (p instanceof SideSmash && Rect.intersects(player.getCollisionRect(), p.getCollisionRect()) )
+            {
+                // canSmash stays true after last object is removed
+                System.out.println("Smash ready!");
+                canSmash = true;
+                System.out.println("Power-up collided. Removing.");
+
+                sndpowerup.start();
+
+                powerUps.remove(p);
+                numPowerUps--;
+
+            }
+
+            if (p instanceof Coin && Rect.intersects(player.getCollisionRect(), p.getCollisionRect()) )
+            {
+                score += 75;
+                System.out.println("Score is " + score);
+                System.out.println("Power-up collided. Removing.");
+
+                sndpowerup.start();
+
+                powerUps.remove(p);
+                numPowerUps--;
+
+            }
+
+            if (p instanceof UpPipe && Rect.intersects(player.getCollisionRect(), p.getCollisionRect()) )
+            {
+                if(player.getCollisionRect().top != p.getCollisionRect().top && player.getCollisionRect().left == p.getCollisionRect().left) {
+                    pipeKey=1;
+
+                    if (firstHitPipe) {
+                        sndpowerup.start();
+                        firstHitPipe = false;
+                        System.out.println("Pipe. Going up.");
+                    }
+                }
+                else {
+                    System.out.println("Failed to get pipe or pipe out of range.");
+                    System.out.println("Power-up collided. Removing.");
+                    powerUps.remove(p);
+                    numPowerUps--;
+
+                }
             }
         }
 
@@ -912,7 +1013,7 @@ public class GameView extends SurfaceView implements Runnable{
 
         // when power-ups reach end of screen, they are destroyed
         // tiles.get(0).getX()-sideSmash.getWidth()
-        if (sideSmash != null && sideSmash.getX() >=  GameView.getScreenWidth())
+        /*if (sideSmash != null && sideSmash.getX() >=  GameView.getScreenWidth())
         {
             System.out.println("End of screen reached. Destroying power-up.");
             sideSmash = null;
@@ -925,6 +1026,15 @@ public class GameView extends SurfaceView implements Runnable{
             System.out.println("End of screen reached. Destroying power-up.");
             upPipe = null;
             numPowerUps--;
+        }*/
+        for (int i=powerUps.size()-1; i>=0; i--)
+        {
+            if (powerUps.get(i).getX() >= GameView.getScreenWidth())
+            {
+                System.out.println("End of screen reached. Destroying power-up at index " + i);
+                powerUps.remove(i);
+                numPowerUps--;
+            }
         }
     }
 }
