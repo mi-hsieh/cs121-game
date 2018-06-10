@@ -35,5 +35,18 @@
     // calls three methods also defined in this class
 
  */
+ 
+ 4. /* int getIntExtra (String name,
+                int defaultValue)
+
+        Parameters
+
+        name - The name of the desired item.
+
+        defaultValue - the value to be returned if no value of the desired type is stored with the given name.
+
+        Returns
+
+        the value of an item that previously added with putExtra() or the default value if none was found. */
 
  
