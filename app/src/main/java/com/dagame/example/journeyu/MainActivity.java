@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 
 
 //for debugging
@@ -26,11 +28,16 @@ public class MainActivity extends AppCompatActivity {
     // declare GameView (a view = base class for widgets and UI, handles drawing and events)
     private GameView gameView;
 
+    // boolean shouldn't be needed since gameView always null when game over, kept it just in case
+    boolean playingGame = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // no longer using default XML file, activity_main.xml
-        //setContentView(R.layout.activity_main);
+        /*setContentView(R.layout.activity_main);
+
+        Button b = findViewById(R.id.playButton);
+        b.setVisibility(View.INVISIBLE);*/
 
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         //not needed
@@ -40,10 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
         // initialize the GameView object
         // our context is this activity (main activity)
-        gameView = new GameView(this);
+        /*gameView = new GameView(this);
 
         // add the view to our content view
-        setContentView(gameView);
+        setContentView(gameView);*/
+        setContentView(R.layout.activity_main);
 
     }
 
@@ -52,51 +60,78 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause()
     {
         super.onPause();
-        gameView.pause();
+        if (gameView != null) {
+
+            gameView.pause();
+        }
     }
 
     // run the game when the activity is resumed
     // is also called when the activity is first started
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
+        // Note 4
 
-        /* int getIntExtra (String name,
-                int defaultValue)
-
-        Parameters
-
-        name - The name of the desired item.
-
-        defaultValue - the value to be returned if no value of the desired type is stored with the given name.
-
-        Returns
-
-        the value of an item that previously added with putExtra() or the default value if none was found. */
-
-        Intent intent = getIntent();
+        /*Intent intent = getIntent();
         replaying = intent.getIntExtra("replaying", 0);
         System.out.println("Replaying is " + replaying);
 
         // replay = 0 false, replay = 1 true
         // by default replaying should be false
         if (replaying == 0) {
-            super.onResume();
-            gameView.resume();
+                super.onResume();
+                if (gameView != null) {
+                    gameView.resume();
+                }
         }
         else
         {
-            /*gameView = new GameView(this);
-            System.out.println("Started new game");
-            setContentView(gameView);
-            System.out.println("set new game view");
-            replaying = 0;*/
+            // trying to create a new game view will crash the game
 
             // this works for some reason
             // same code as above
-            super.onResume();
+            //* super.onResume();
+            //* gameView.resume();
+            // setContentView(R.layout.activity_main);
+        }*/
+        super.onResume();
+        System.out.println("onResume()");
+        // setContentView(R.layout.activity_main);
+        if (gameView != null && playingGame) {
             gameView.resume();
+            System.out.println("resuming game");
         }
     }
 
+    // Called when the user taps the Play button
+    public void onPlayClicked(View view) {
+
+        Intent intent = getIntent();
+        replaying = intent.getIntExtra("replaying", 0);
+        System.out.println("Replaying is " + replaying);
+
+        if (replaying == 0) {
+            // initialize the GameView object
+            // our context is this activity (main activity)
+            gameView = new GameView(this);
+
+            // add the view to our content view
+            setContentView(gameView);
+
+            //super.onResume();
+            gameView.resume();
+            System.out.println("starting game");
+            playingGame = true;
+        }
+        else
+        {
+            //super.onResume();
+                gameView = new GameView(this);
+                setContentView(gameView);
+                gameView.resume();
+                System.out.println("creating new game");
+                playingGame = true;
+        }
+
+    }
 }

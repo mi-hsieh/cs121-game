@@ -967,7 +967,6 @@ public class GameView extends SurfaceView implements Runnable{
             if (p instanceof Coin && Rect.intersects(player.getCollisionRect(), p.getCollisionRect()) )
             {
                 score += 75;
-                System.out.println("Score is " + score);
                 System.out.println("Power-up collided. Removing.");
 
                 sndpowerup.start();
